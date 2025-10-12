@@ -35,42 +35,53 @@ ZONE = "security"
 # (Name, CSV filename, username-key để random_value_for_device)
 # -----------------------------------------------------------------------------
 DEVICES = [
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door1"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door2"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door3"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door4"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door5"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door6"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door7"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door8"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door9"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door10"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door11"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door12"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door13"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door14"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door15"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door16"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door17"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door18"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door19"),
-    ("DoorLock",    "DoorlockMQTTset.csv",          "sensor_door20"),
-    ("CO-Gas",      "CO-GasMQTTset.csv",            "sensor_co1"),
-    ("CO-Gas",      "CO-GasMQTTset.csv",            "sensor_co2"),
-    ("CO-Gas",      "CO-GasMQTTset.csv",            "sensor_co3"),
-    ("CO-Gas",      "CO-GasMQTTset.csv",            "sensor_co4"),
-    ("CO-Gas",      "CO-GasMQTTset.csv",            "sensor_co5"),
-    ("AirQuality",  "air-quality_gotham.csv",       "sensor_air1"),
-    ("AirQuality",  "air-quality_gotham.csv",       "sensor_air2"),
-    ("AirQuality",  "air-quality_gotham.csv",       "sensor_air3"),
-    ("AirQuality",  "air-quality_gotham.csv",       "sensor_air4"),
-    ("AirQuality",  "air-quality_gotham.csv",       "sensor_air5"),
-    ("Smoke",       "SmokeMQTTset.csv",             "sensor_smoke1"),
-    ("Smoke",       "SmokeMQTTset.csv",             "sensor_smoke2"),
-    ("Smoke",       "SmokeMQTTset.csv",             "sensor_smoke3"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv","sensor_flame1"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv","sensor_flame2"),  
-    ("Camera",      "MotionMQTTset.csv",            "sensor_motion"),
+        # -------- DoorLock --------
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door1",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door2",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door3",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door4",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door5",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door6",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door7",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door8",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door9",  "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door10", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door11", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door12", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door13", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door14", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door15", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door16", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door17", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door18", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door19", "door123"),
+    ("DoorLock",    "DoorlockMQTTset.csv",           "security-sensor_door20", "door123"),
+
+    # -------- CO-Gas --------
+    ("CO-Gas",      "CO-GasMQTTset.csv",             "security-sensor_co1",    "co123"),
+    ("CO-Gas",      "CO-GasMQTTset.csv",             "security-sensor_co2",    "co123"),
+    ("CO-Gas",      "CO-GasMQTTset.csv",             "security-sensor_co3",    "co123"),
+    ("CO-Gas",      "CO-GasMQTTset.csv",             "security-sensor_co4",    "co123"),
+    ("CO-Gas",      "CO-GasMQTTset.csv",             "security-sensor_co5",    "co123"),
+
+    # -------- AirQuality --------
+    ("AirQuality",  "air-quality_gotham.csv",        "security-sensor_air1",   "air123"),
+    ("AirQuality",  "air-quality_gotham.csv",        "security-sensor_air2",   "air123"),
+    ("AirQuality",  "air-quality_gotham.csv",        "security-sensor_air3",   "air123"),
+    ("AirQuality",  "air-quality_gotham.csv",        "security-sensor_air4",   "air123"),
+    ("AirQuality",  "air-quality_gotham.csv",        "security-sensor_air5",   "air123"),
+
+    # -------- Smoke --------
+    ("Smoke",       "SmokeMQTTset.csv",              "security-sensor_smoke1", "smoke123"),
+    ("Smoke",       "SmokeMQTTset.csv",              "security-sensor_smoke2", "smoke123"),
+    ("Smoke",       "SmokeMQTTset.csv",              "security-sensor_smoke3", "smoke123"),
+
+    # -------- FlameSensor --------
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame1", "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame2", "flame123"),
+
+    # -------- Camera (Motion) --------
+    ("Camera",      "MotionMQTTset.csv",             "security-sensor_motion", "motion123"),
 ]
 
 # ----------------------------------------------------------------------------- 
