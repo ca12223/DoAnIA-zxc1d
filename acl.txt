@@ -1,4 +1,4 @@
-% ---------- EMQX File Authorizer ACL (factory/office) ----------
+% ---------- EMQX File Authorizer ACL (all zones) ----------
 % Require: Authorization -> Settings -> No match = deny
 
 % Allow dashboard users to read $SYS
@@ -10,70 +10,685 @@
 % Block $SYS and blanket "#" subscriptions for everyone
 {deny, all, subscribe, ["$SYS/#", {eq, "#"}]}.
 
-% -------- Devices: Temperature --------
-{allow, {username, "sensor_temp1"}, publish,   ["factory/office/sensor_temp1/telemetry"]}.
-{allow, {username, "sensor_temp1"}, subscribe, ["factory/office/sensor_temp1/command"]}.
-{allow, {username, "sensor_temp2"}, publish,   ["factory/office/sensor_temp2/telemetry"]}.
-{allow, {username, "sensor_temp2"}, subscribe, ["factory/office/sensor_temp2/command"]}.
-{allow, {username, "sensor_temp3"}, publish,   ["factory/office/sensor_temp3/telemetry"]}.
-{allow, {username, "sensor_temp3"}, subscribe, ["factory/office/sensor_temp3/command"]}.
-{allow, {username, "sensor_temp4"}, publish,   ["factory/office/sensor_temp4/telemetry"]}.
-{allow, {username, "sensor_temp4"}, subscribe, ["factory/office/sensor_temp4/command"]}.
-{allow, {username, "sensor_temp5"}, publish,   ["factory/office/sensor_temp5/telemetry"]}.
-{allow, {username, "sensor_temp5"}, subscribe, ["factory/office/sensor_temp5/command"]}.
-{allow, {username, "sensor_temp6"}, publish,   ["factory/office/sensor_temp6/telemetry"]}.
-{allow, {username, "sensor_temp6"}, subscribe, ["factory/office/sensor_temp6/command"]}.
-{allow, {username, "sensor_temp7"}, publish,   ["factory/office/sensor_temp7/telemetry"]}.
-{allow, {username, "sensor_temp7"}, subscribe, ["factory/office/sensor_temp7/command"]}.
-{allow, {username, "sensor_temp8"}, publish,   ["factory/office/sensor_temp8/telemetry"]}.
-{allow, {username, "sensor_temp8"}, subscribe, ["factory/office/sensor_temp8/command"]}.
-
-% -------- Devices: Humidity --------
-{allow, {username, "sensor_hum1"}, publish,   ["factory/office/sensor_hum1/telemetry"]}.
-{allow, {username, "sensor_hum1"}, subscribe, ["factory/office/sensor_hum1/command"]}.
-{allow, {username, "sensor_hum2"}, publish,   ["factory/office/sensor_hum2/telemetry"]}.
-{allow, {username, "sensor_hum2"}, subscribe, ["factory/office/sensor_hum2/command"]}.
-{allow, {username, "sensor_hum3"}, publish,   ["factory/office/sensor_hum3/telemetry"]}.
-{allow, {username, "sensor_hum3"}, subscribe, ["factory/office/sensor_hum3/command"]}.
-{allow, {username, "sensor_hum4"}, publish,   ["factory/office/sensor_hum4/telemetry"]}.
-{allow, {username, "sensor_hum4"}, subscribe, ["factory/office/sensor_hum4/command"]}.
-{allow, {username, "sensor_hum5"}, publish,   ["factory/office/sensor_hum5/telemetry"]}.
-{allow, {username, "sensor_hum5"}, subscribe, ["factory/office/sensor_hum5/command"]}.
-{allow, {username, "sensor_hum6"}, publish,   ["factory/office/sensor_hum6/telemetry"]}.
-{allow, {username, "sensor_hum6"}, subscribe, ["factory/office/sensor_hum6/command"]}.
-{allow, {username, "sensor_hum7"}, publish,   ["factory/office/sensor_hum7/telemetry"]}.
-{allow, {username, "sensor_hum7"}, subscribe, ["factory/office/sensor_hum7/command"]}.
-{allow, {username, "sensor_hum8"}, publish,   ["factory/office/sensor_hum8/telemetry"]}.
-{allow, {username, "sensor_hum8"}, subscribe, ["factory/office/sensor_hum8/command"]}.
-
-% -------- Devices: Light --------
-{allow, {username, "sensor_light1"}, publish,   ["factory/office/sensor_light1/telemetry"]}.
-{allow, {username, "sensor_light1"}, subscribe, ["factory/office/sensor_light1/command"]}.
-{allow, {username, "sensor_light2"}, publish,   ["factory/office/sensor_light2/telemetry"]}.
-{allow, {username, "sensor_light2"}, subscribe, ["factory/office/sensor_light2/command"]}.
-{allow, {username, "sensor_light3"}, publish,   ["factory/office/sensor_light3/telemetry"]}.
-{allow, {username, "sensor_light3"}, subscribe, ["factory/office/sensor_light3/command"]}.
-{allow, {username, "sensor_light4"}, publish,   ["factory/office/sensor_light4/telemetry"]}.
-{allow, {username, "sensor_light4"}, subscribe, ["factory/office/sensor_light4/command"]}.
-{allow, {username, "sensor_light5"}, publish,   ["factory/office/sensor_light5/telemetry"]}.
-{allow, {username, "sensor_light5"}, subscribe, ["factory/office/sensor_light5/command"]}.
-
-% -------- Devices: DoorLock --------
-{allow, {username, "sensor_door1"}, publish,   ["factory/office/sensor_door1/telemetry"]}.
-{allow, {username, "sensor_door1"}, subscribe, ["factory/office/sensor_door1/command"]}.
-{allow, {username, "sensor_door2"}, publish,   ["factory/office/sensor_door2/telemetry"]}.
-{allow, {username, "sensor_door2"}, subscribe, ["factory/office/sensor_door2/command"]}.
-{allow, {username, "sensor_door3"}, publish,   ["factory/office/sensor_door3/telemetry"]}.
-{allow, {username, "sensor_door3"}, subscribe, ["factory/office/sensor_door3/command"]}.
-{allow, {username, "sensor_door4"}, publish,   ["factory/office/sensor_door4/telemetry"]}.
-{allow, {username, "sensor_door4"}, subscribe, ["factory/office/sensor_door4/command"]}.
-{allow, {username, "sensor_door5"}, publish,   ["factory/office/sensor_door5/telemetry"]}.
-{allow, {username, "sensor_door5"}, subscribe, ["factory/office/sensor_door5/command"]}.
-% --- Telegraf subscriber (read all telemetry) ---
+% --- Telegraf subscribers (read all telemetry) ---
 {allow, {username, "telegraf"}, subscribe, [
-    "factory/+/+/telemetry",
-    "$share/telegraf/factory/+/+/telemetry"   % if you use shared subs
+    "factory/office/+/telemetry",
+    "$share/telegraf/factory/office/+/telemetry"
+]}.
+{allow, {username, "telegraf"}, subscribe, [
+    "factory/energy/+/telemetry",
+    "$share/telegraf/factory/energy/+/telemetry"
+]}.
+{allow, {username, "telegraf"}, subscribe, [
+    "factory/production/+/telemetry",
+    "$share/telegraf/factory/production/+/telemetry"
+]}.
+{allow, {username, "telegraf"}, subscribe, [
+    "factory/security/+/telemetry",
+    "$share/telegraf/factory/security/+/telemetry"
+]}.
+{allow, {username, "telegraf"}, subscribe, [
+    "factory/storage/+/telemetry",
+    "$share/telegraf/factory/storage/+/telemetry"
 ]}.
 
-% Final catch-all so this source never returns "no_match"
+%% -------------------------------------------------------------------
+%% Devices (username == topic segment).
+%% topics = factory/<zone>/<username>/{telemetry|command}
+%% -------------------------------------------------------------------
+
+% ===================== OFFICE =====================
+
+% -------- Temperature --------
+{allow, {username, "office-sensortemp1-replayer"}, publish,   ["factory/office/office-sensortemp1-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp1-replayer"}, subscribe, ["factory/office/office-sensortemp1-replayer/command"]}.
+{allow, {username, "office-sensortemp2-replayer"}, publish,   ["factory/office/office-sensortemp2-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp2-replayer"}, subscribe, ["factory/office/office-sensortemp2-replayer/command"]}.
+{allow, {username, "office-sensortemp3-replayer"}, publish,   ["factory/office/office-sensortemp3-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp3-replayer"}, subscribe, ["factory/office/office-sensortemp3-replayer/command"]}.
+{allow, {username, "office-sensortemp4-replayer"}, publish,   ["factory/office/office-sensortemp4-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp4-replayer"}, subscribe, ["factory/office/office-sensortemp4-replayer/command"]}.
+{allow, {username, "office-sensortemp5-replayer"}, publish,   ["factory/office/office-sensortemp5-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp5-replayer"}, subscribe, ["factory/office/office-sensortemp5-replayer/command"]}.
+{allow, {username, "office-sensortemp6-replayer"}, publish,   ["factory/office/office-sensortemp6-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp6-replayer"}, subscribe, ["factory/office/office-sensortemp6-replayer/command"]}.
+{allow, {username, "office-sensortemp7-replayer"}, publish,   ["factory/office/office-sensortemp7-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp7-replayer"}, subscribe, ["factory/office/office-sensortemp7-replayer/command"]}.
+{allow, {username, "office-sensortemp8-replayer"}, publish,   ["factory/office/office-sensortemp8-replayer/telemetry"]}.
+{allow, {username, "office-sensortemp8-replayer"}, subscribe, ["factory/office/office-sensortemp8-replayer/command"]}.
+
+% -------- Humidity --------
+{allow, {username, "office-sensorhum1-replayer"}, publish,   ["factory/office/office-sensorhum1-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum1-replayer"}, subscribe, ["factory/office/office-sensorhum1-replayer/command"]}.
+{allow, {username, "office-sensorhum2-replayer"}, publish,   ["factory/office/office-sensorhum2-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum2-replayer"}, subscribe, ["factory/office/office-sensorhum2-replayer/command"]}.
+{allow, {username, "office-sensorhum3-replayer"}, publish,   ["factory/office/office-sensorhum3-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum3-replayer"}, subscribe, ["factory/office/office-sensorhum3-replayer/command"]}.
+{allow, {username, "office-sensorhum4-replayer"}, publish,   ["factory/office/office-sensorhum4-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum4-replayer"}, subscribe, ["factory/office/office-sensorhum4-replayer/command"]}.
+{allow, {username, "office-sensorhum5-replayer"}, publish,   ["factory/office/office-sensorhum5-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum5-replayer"}, subscribe, ["factory/office/office-sensorhum5-replayer/command"]}.
+{allow, {username, "office-sensorhum6-replayer"}, publish,   ["factory/office/office-sensorhum6-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum6-replayer"}, subscribe, ["factory/office/office-sensorhum6-replayer/command"]}.
+{allow, {username, "office-sensorhum7-replayer"}, publish,   ["factory/office/office-sensorhum7-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum7-replayer"}, subscribe, ["factory/office/office-sensorhum7-replayer/command"]}.
+{allow, {username, "office-sensorhum8-replayer"}, publish,   ["factory/office/office-sensorhum8-replayer/telemetry"]}.
+{allow, {username, "office-sensorhum8-replayer"}, subscribe, ["factory/office/office-sensorhum8-replayer/command"]}.
+
+% -------- Light --------
+{allow, {username, "office-sensorlight1-replayer"}, publish,   ["factory/office/office-sensorlight1-replayer/telemetry"]}.
+{allow, {username, "office-sensorlight1-replayer"}, subscribe, ["factory/office/office-sensorlight1-replayer/command"]}.
+{allow, {username, "office-sensorlight2-replayer"}, publish,   ["factory/office/office-sensorlight2-replayer/telemetry"]}.
+{allow, {username, "office-sensorlight2-replayer"}, subscribe, ["factory/office/office-sensorlight2-replayer/command"]}.
+{allow, {username, "office-sensorlight3-replayer"}, publish,   ["factory/office/office-sensorlight3-replayer/telemetry"]}.
+{allow, {username, "office-sensorlight3-replayer"}, subscribe, ["factory/office/office-sensorlight3-replayer/command"]}.
+{allow, {username, "office-sensorlight4-replayer"}, publish,   ["factory/office/office-sensorlight4-replayer/telemetry"]}.
+{allow, {username, "office-sensorlight4-replayer"}, subscribe, ["factory/office/office-sensorlight4-replayer/command"]}.
+{allow, {username, "office-sensorlight5-replayer"}, publish,   ["factory/office/office-sensorlight5-replayer/telemetry"]}.
+{allow, {username, "office-sensorlight5-replayer"}, subscribe, ["factory/office/office-sensorlight5-replayer/command"]}.
+
+% -------- DoorLock --------
+{allow, {username, "office-sensordoor1-replayer"}, publish,   ["factory/office/office-sensordoor1-replayer/telemetry"]}.
+{allow, {username, "office-sensordoor1-replayer"}, subscribe, ["factory/office/office-sensordoor1-replayer/command"]}.
+{allow, {username, "office-sensordoor2-replayer"}, publish,   ["factory/office/office-sensordoor2-replayer/telemetry"]}.
+{allow, {username, "office-sensordoor2-replayer"}, subscribe, ["factory/office/office-sensordoor2-replayer/command"]}.
+{allow, {username, "office-sensordoor3-replayer"}, publish,   ["factory/office/office-sensordoor3-replayer/telemetry"]}.
+{allow, {username, "office-sensordoor3-replayer"}, subscribe, ["factory/office/office-sensordoor3-replayer/command"]}.
+{allow, {username, "office-sensordoor4-replayer"}, publish,   ["factory/office/office-sensordoor4-replayer/telemetry"]}.
+{allow, {username, "office-sensordoor4-replayer"}, subscribe, ["factory/office/office-sensordoor4-replayer/command"]}.
+{allow, {username, "office-sensordoor5-replayer"}, publish,   ["factory/office/office-sensordoor5-replayer/telemetry"]}.
+{allow, {username, "office-sensordoor5-replayer"}, subscribe, ["factory/office/office-sensordoor5-replayer/command"]}.
+
+% ===================== ENERGY =====================
+
+% -------- CoolerMotor (1..15) --------
+{allow, {username, "energy-sensorcooler1-replayer"}, publish,   ["factory/energy/energy-sensorcooler1-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler1-replayer"}, subscribe, ["factory/energy/energy-sensorcooler1-replayer/command"]}.
+{allow, {username, "energy-sensorcooler2-replayer"}, publish,   ["factory/energy/energy-sensorcooler2-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler2-replayer"}, subscribe, ["factory/energy/energy-sensorcooler2-replayer/command"]}.
+{allow, {username, "energy-sensorcooler3-replayer"}, publish,   ["factory/energy/energy-sensorcooler3-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler3-replayer"}, subscribe, ["factory/energy/energy-sensorcooler3-replayer/command"]}.
+{allow, {username, "energy-sensorcooler4-replayer"}, publish,   ["factory/energy/energy-sensorcooler4-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler4-replayer"}, subscribe, ["factory/energy/energy-sensorcooler4-replayer/command"]}.
+{allow, {username, "energy-sensorcooler5-replayer"}, publish,   ["factory/energy/energy-sensorcooler5-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler5-replayer"}, subscribe, ["factory/energy/energy-sensorcooler5-replayer/command"]}.
+{allow, {username, "energy-sensorcooler6-replayer"}, publish,   ["factory/energy/energy-sensorcooler6-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler6-replayer"}, subscribe, ["factory/energy/energy-sensorcooler6-replayer/command"]}.
+{allow, {username, "energy-sensorcooler7-replayer"}, publish,   ["factory/energy/energy-sensorcooler7-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler7-replayer"}, subscribe, ["factory/energy/energy-sensorcooler7-replayer/command"]}.
+{allow, {username, "energy-sensorcooler8-replayer"}, publish,   ["factory/energy/energy-sensorcooler8-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler8-replayer"}, subscribe, ["factory/energy/energy-sensorcooler8-replayer/command"]}.
+{allow, {username, "energy-sensorcooler9-replayer"}, publish,   ["factory/energy/energy-sensorcooler9-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler9-replayer"}, subscribe, ["factory/energy/energy-sensorcooler9-replayer/command"]}.
+{allow, {username, "energy-sensorcooler10-replayer"}, publish,   ["factory/energy/energy-sensorcooler10-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler10-replayer"}, subscribe, ["factory/energy/energy-sensorcooler10-replayer/command"]}.
+{allow, {username, "energy-sensorcooler11-replayer"}, publish,   ["factory/energy/energy-sensorcooler11-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler11-replayer"}, subscribe, ["factory/energy/energy-sensorcooler11-replayer/command"]}.
+{allow, {username, "energy-sensorcooler12-replayer"}, publish,   ["factory/energy/energy-sensorcooler12-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler12-replayer"}, subscribe, ["factory/energy/energy-sensorcooler12-replayer/command"]}.
+{allow, {username, "energy-sensorcooler13-replayer"}, publish,   ["factory/energy/energy-sensorcooler13-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler13-replayer"}, subscribe, ["factory/energy/energy-sensorcooler13-replayer/command"]}.
+{allow, {username, "energy-sensorcooler14-replayer"}, publish,   ["factory/energy/energy-sensorcooler14-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler14-replayer"}, subscribe, ["factory/energy/energy-sensorcooler14-replayer/command"]}.
+{allow, {username, "energy-sensorcooler15-replayer"}, publish,   ["factory/energy/energy-sensorcooler15-replayer/telemetry"]}.
+{allow, {username, "energy-sensorcooler15-replayer"}, subscribe, ["factory/energy/energy-sensorcooler15-replayer/command"]}.
+
+% -------- FanSpeed (1..5) --------
+{allow, {username, "energy-sensorfanspeed1-replayer"}, publish,   ["factory/energy/energy-sensorfanspeed1-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfanspeed1-replayer"}, subscribe, ["factory/energy/energy-sensorfanspeed1-replayer/command"]}.
+{allow, {username, "energy-sensorfanspeed2-replayer"}, publish,   ["factory/energy/energy-sensorfanspeed2-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfanspeed2-replayer"}, subscribe, ["factory/energy/energy-sensorfanspeed2-replayer/command"]}.
+{allow, {username, "energy-sensorfanspeed3-replayer"}, publish,   ["factory/energy/energy-sensorfanspeed3-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfanspeed3-replayer"}, subscribe, ["factory/energy/energy-sensorfanspeed3-replayer/command"]}.
+{allow, {username, "energy-sensorfanspeed4-replayer"}, publish,   ["factory/energy/energy-sensorfanspeed4-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfanspeed4-replayer"}, subscribe, ["factory/energy/energy-sensorfanspeed4-replayer/command"]}.
+{allow, {username, "energy-sensorfanspeed5-replayer"}, publish,   ["factory/energy/energy-sensorfanspeed5-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfanspeed5-replayer"}, subscribe, ["factory/energy/energy-sensorfanspeed5-replayer/command"]}.
+
+% -------- FanSensor (1..5) --------
+{allow, {username, "energy-sensorfan1-replayer"}, publish,   ["factory/energy/energy-sensorfan1-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfan1-replayer"}, subscribe, ["factory/energy/energy-sensorfan1-replayer/command"]}.
+{allow, {username, "energy-sensorfan2-replayer"}, publish,   ["factory/energy/energy-sensorfan2-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfan2-replayer"}, subscribe, ["factory/energy/energy-sensorfan2-replayer/command"]}.
+{allow, {username, "energy-sensorfan3-replayer"}, publish,   ["factory/energy/energy-sensorfan3-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfan3-replayer"}, subscribe, ["factory/energy/energy-sensorfan3-replayer/command"]}.
+{allow, {username, "energy-sensorfan4-replayer"}, publish,   ["factory/energy/energy-sensorfan4-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfan4-replayer"}, subscribe, ["factory/energy/energy-sensorfan4-replayer/command"]}.
+{allow, {username, "energy-sensorfan5-replayer"}, publish,   ["factory/energy/energy-sensorfan5-replayer/telemetry"]}.
+{allow, {username, "energy-sensorfan5-replayer"}, subscribe, ["factory/energy/energy-sensorfan5-replayer/command"]}.
+
+% -------- Motion (1..20) --------
+{allow, {username, "energy-sensormotion1-replayer"}, publish,   ["factory/energy/energy-sensormotion1-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion1-replayer"}, subscribe, ["factory/energy/energy-sensormotion1-replayer/command"]}.
+{allow, {username, "energy-sensormotion2-replayer"}, publish,   ["factory/energy/energy-sensormotion2-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion2-replayer"}, subscribe, ["factory/energy/energy-sensormotion2-replayer/command"]}.
+{allow, {username, "energy-sensormotion3-replayer"}, publish,   ["factory/energy/energy-sensormotion3-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion3-replayer"}, subscribe, ["factory/energy/energy-sensormotion3-replayer/command"]}.
+{allow, {username, "energy-sensormotion4-replayer"}, publish,   ["factory/energy/energy-sensormotion4-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion4-replayer"}, subscribe, ["factory/energy/energy-sensormotion4-replayer/command"]}.
+{allow, {username, "energy-sensormotion5-replayer"}, publish,   ["factory/energy/energy-sensormotion5-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion5-replayer"}, subscribe, ["factory/energy/energy-sensormotion5-replayer/command"]}.
+{allow, {username, "energy-sensormotion6-replayer"}, publish,   ["factory/energy/energy-sensormotion6-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion6-replayer"}, subscribe, ["factory/energy/energy-sensormotion6-replayer/command"]}.
+{allow, {username, "energy-sensormotion7-replayer"}, publish,   ["factory/energy/energy-sensormotion7-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion7-replayer"}, subscribe, ["factory/energy/energy-sensormotion7-replayer/command"]}.
+{allow, {username, "energy-sensormotion8-replayer"}, publish,   ["factory/energy/energy-sensormotion8-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion8-replayer"}, subscribe, ["factory/energy/energy-sensormotion8-replayer/command"]}.
+{allow, {username, "energy-sensormotion9-replayer"}, publish,   ["factory/energy/energy-sensormotion9-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion9-replayer"}, subscribe, ["factory/energy/energy-sensormotion9-replayer/command"]}.
+{allow, {username, "energy-sensormotion10-replayer"}, publish,   ["factory/energy/energy-sensormotion10-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion10-replayer"}, subscribe, ["factory/energy/energy-sensormotion10-replayer/command"]}.
+{allow, {username, "energy-sensormotion11-replayer"}, publish,   ["factory/energy/energy-sensormotion11-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion11-replayer"}, subscribe, ["factory/energy/energy-sensormotion11-replayer/command"]}.
+{allow, {username, "energy-sensormotion12-replayer"}, publish,   ["factory/energy/energy-sensormotion12-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion12-replayer"}, subscribe, ["factory/energy/energy-sensormotion12-replayer/command"]}.
+{allow, {username, "energy-sensormotion13-replayer"}, publish,   ["factory/energy/energy-sensormotion13-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion13-replayer"}, subscribe, ["factory/energy/energy-sensormotion13-replayer/command"]}.
+{allow, {username, "energy-sensormotion14-replayer"}, publish,   ["factory/energy/energy-sensormotion14-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion14-replayer"}, subscribe, ["factory/energy/energy-sensormotion14-replayer/command"]}.
+{allow, {username, "energy-sensormotion15-replayer"}, publish,   ["factory/energy/energy-sensormotion15-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion15-replayer"}, subscribe, ["factory/energy/energy-sensormotion15-replayer/command"]}.
+{allow, {username, "energy-sensormotion16-replayer"}, publish,   ["factory/energy/energy-sensormotion16-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion16-replayer"}, subscribe, ["factory/energy/energy-sensormotion16-replayer/command"]}.
+{allow, {username, "energy-sensormotion17-replayer"}, publish,   ["factory/energy/energy-sensormotion17-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion17-replayer"}, subscribe, ["factory/energy/energy-sensormotion17-replayer/command"]}.
+{allow, {username, "energy-sensormotion18-replayer"}, publish,   ["factory/energy/energy-sensormotion18-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion18-replayer"}, subscribe, ["factory/energy/energy-sensormotion18-replayer/command"]}.
+{allow, {username, "energy-sensormotion19-replayer"}, publish,   ["factory/energy/energy-sensormotion19-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion19-replayer"}, subscribe, ["factory/energy/energy-sensormotion19-replayer/command"]}.
+{allow, {username, "energy-sensormotion20-replayer"}, publish,   ["factory/energy/energy-sensormotion20-replayer/telemetry"]}.
+{allow, {username, "energy-sensormotion20-replayer"}, subscribe, ["factory/energy/energy-sensormotion20-replayer/command"]}.
+
+% ===================== PRODUCTION =====================
+
+% -------- PredictiveMaintenance (1..20) --------
+{allow, {username, "production-sensorpredictive1-replayer"}, publish,   ["factory/production/production-sensorpredictive1-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive1-replayer"}, subscribe, ["factory/production/production-sensorpredictive1-replayer/command"]}.
+{allow, {username, "production-sensorpredictive2-replayer"}, publish,   ["factory/production/production-sensorpredictive2-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive2-replayer"}, subscribe, ["factory/production/production-sensorpredictive2-replayer/command"]}.
+{allow, {username, "production-sensorpredictive3-replayer"}, publish,   ["factory/production/production-sensorpredictive3-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive3-replayer"}, subscribe, ["factory/production/production-sensorpredictive3-replayer/command"]}.
+{allow, {username, "production-sensorpredictive4-replayer"}, publish,   ["factory/production/production-sensorpredictive4-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive4-replayer"}, subscribe, ["factory/production/production-sensorpredictive4-replayer/command"]}.
+{allow, {username, "production-sensorpredictive5-replayer"}, publish,   ["factory/production/production-sensorpredictive5-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive5-replayer"}, subscribe, ["factory/production/production-sensorpredictive5-replayer/command"]}.
+{allow, {username, "production-sensorpredictive6-replayer"}, publish,   ["factory/production/production-sensorpredictive6-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive6-replayer"}, subscribe, ["factory/production/production-sensorpredictive6-replayer/command"]}.
+{allow, {username, "production-sensorpredictive7-replayer"}, publish,   ["factory/production/production-sensorpredictive7-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive7-replayer"}, subscribe, ["factory/production/production-sensorpredictive7-replayer/command"]}.
+{allow, {username, "production-sensorpredictive8-replayer"}, publish,   ["factory/production/production-sensorpredictive8-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive8-replayer"}, subscribe, ["factory/production/production-sensorpredictive8-replayer/command"]}.
+{allow, {username, "production-sensorpredictive9-replayer"}, publish,   ["factory/production/production-sensorpredictive9-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive9-replayer"}, subscribe, ["factory/production/production-sensorpredictive9-replayer/command"]}.
+{allow, {username, "production-sensorpredictive10-replayer"}, publish,   ["factory/production/production-sensorpredictive10-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive10-replayer"}, subscribe, ["factory/production/production-sensorpredictive10-replayer/command"]}.
+{allow, {username, "production-sensorpredictive11-replayer"}, publish,   ["factory/production/production-sensorpredictive11-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive11-replayer"}, subscribe, ["factory/production/production-sensorpredictive11-replayer/command"]}.
+{allow, {username, "production-sensorpredictive12-replayer"}, publish,   ["factory/production/production-sensorpredictive12-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive12-replayer"}, subscribe, ["factory/production/production-sensorpredictive12-replayer/command"]}.
+{allow, {username, "production-sensorpredictive13-replayer"}, publish,   ["factory/production/production-sensorpredictive13-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive13-replayer"}, subscribe, ["factory/production/production-sensorpredictive13-replayer/command"]}.
+{allow, {username, "production-sensorpredictive14-replayer"}, publish,   ["factory/production/production-sensorpredictive14-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive14-replayer"}, subscribe, ["factory/production/production-sensorpredictive14-replayer/command"]}.
+{allow, {username, "production-sensorpredictive15-replayer"}, publish,   ["factory/production/production-sensorpredictive15-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive15-replayer"}, subscribe, ["factory/production/production-sensorpredictive15-replayer/command"]}.
+{allow, {username, "production-sensorpredictive16-replayer"}, publish,   ["factory/production/production-sensorpredictive16-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive16-replayer"}, subscribe, ["factory/production/production-sensorpredictive16-replayer/command"]}.
+{allow, {username, "production-sensorpredictive17-replayer"}, publish,   ["factory/production/production-sensorpredictive17-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive17-replayer"}, subscribe, ["factory/production/production-sensorpredictive17-replayer/command"]}.
+{allow, {username, "production-sensorpredictive18-replayer"}, publish,   ["factory/production/production-sensorpredictive18-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive18-replayer"}, subscribe, ["factory/production/production-sensorpredictive18-replayer/command"]}.
+{allow, {username, "production-sensorpredictive19-replayer"}, publish,   ["factory/production/production-sensorpredictive19-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive19-replayer"}, subscribe, ["factory/production/production-sensorpredictive19-replayer/command"]}.
+{allow, {username, "production-sensorpredictive20-replayer"}, publish,   ["factory/production/production-sensorpredictive20-replayer/telemetry"]}.
+{allow, {username, "production-sensorpredictive20-replayer"}, subscribe, ["factory/production/production-sensorpredictive20-replayer/command"]}.
+
+% -------- HydraulicSystem (1..20) --------
+% (same two rules per device)
+{allow, {username, "production-sensorhydraulic1-replayer"}, publish,   ["factory/production/production-sensorhydraulic1-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic1-replayer"}, subscribe, ["factory/production/production-sensorhydraulic1-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic2-replayer"}, publish,   ["factory/production/production-sensorhydraulic2-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic2-replayer"}, subscribe, ["factory/production/production-sensorhydraulic2-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic3-replayer"}, publish,   ["factory/production/production-sensorhydraulic3-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic3-replayer"}, subscribe, ["factory/production/production-sensorhydraulic3-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic4-replayer"}, publish,   ["factory/production/production-sensorhydraulic4-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic4-replayer"}, subscribe, ["factory/production/production-sensorhydraulic4-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic5-replayer"}, publish,   ["factory/production/production-sensorhydraulic5-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic5-replayer"}, subscribe, ["factory/production/production-sensorhydraulic5-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic6-replayer"}, publish,   ["factory/production/production-sensorhydraulic6-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic6-replayer"}, subscribe, ["factory/production/production-sensorhydraulic6-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic7-replayer"}, publish,   ["factory/production/production-sensorhydraulic7-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic7-replayer"}, subscribe, ["factory/production/production-sensorhydraulic7-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic8-replayer"}, publish,   ["factory/production/production-sensorhydraulic8-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic8-replayer"}, subscribe, ["factory/production/production-sensorhydraulic8-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic9-replayer"}, publish,   ["factory/production/production-sensorhydraulic9-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic9-replayer"}, subscribe, ["factory/production/production-sensorhydraulic9-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic10-replayer"}, publish,   ["factory/production/production-sensorhydraulic10-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic10-replayer"}, subscribe, ["factory/production/production-sensorhydraulic10-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic11-replayer"}, publish,   ["factory/production/production-sensorhydraulic11-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic11-replayer"}, subscribe, ["factory/production/production-sensorhydraulic11-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic12-replayer"}, publish,   ["factory/production/production-sensorhydraulic12-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic12-replayer"}, subscribe, ["factory/production/production-sensorhydraulic12-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic13-replayer"}, publish,   ["factory/production/production-sensorhydraulic13-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic13-replayer"}, subscribe, ["factory/production/production-sensorhydraulic13-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic14-replayer"}, publish,   ["factory/production/production-sensorhydraulic14-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic14-replayer"}, subscribe, ["factory/production/production-sensorhydraulic14-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic15-replayer"}, publish,   ["factory/production/production-sensorhydraulic15-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic15-replayer"}, subscribe, ["factory/production/production-sensorhydraulic15-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic16-replayer"}, publish,   ["factory/production/production-sensorhydraulic16-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic16-replayer"}, subscribe, ["factory/production/production-sensorhydraulic16-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic17-replayer"}, publish,   ["factory/production/production-sensorhydraulic17-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic17-replayer"}, subscribe, ["factory/production/production-sensorhydraulic17-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic18-replayer"}, publish,   ["factory/production/production-sensorhydraulic18-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic18-replayer"}, subscribe, ["factory/production/production-sensorhydraulic18-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic19-replayer"}, publish,   ["factory/production/production-sensorhydraulic19-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic19-replayer"}, subscribe, ["factory/production/production-sensorhydraulic19-replayer/command"]}.
+{allow, {username, "production-sensorhydraulic20-replayer"}, publish,   ["factory/production/production-sensorhydraulic20-replayer/telemetry"]}.
+{allow, {username, "production-sensorhydraulic20-replayer"}, subscribe, ["factory/production/production-sensorhydraulic20-replayer/command"]}.
+
+% -------- FlameSensor (1..5) --------
+{allow, {username, "production-sensorflame1-replayer"}, publish,   ["factory/production/production-sensorflame1-replayer/telemetry"]}.
+{allow, {username, "production-sensorflame1-replayer"}, subscribe, ["factory/production/production-sensorflame1-replayer/command"]}.
+{allow, {username, "production-sensorflame2-replayer"}, publish,   ["factory/production/production-sensorflame2-replayer/telemetry"]}.
+{allow, {username, "production-sensorflame2-replayer"}, subscribe, ["factory/production/production-sensorflame2-replayer/command"]}.
+{allow, {username, "production-sensorflame3-replayer"}, publish,   ["factory/production/production-sensorflame3-replayer/telemetry"]}.
+{allow, {username, "production-sensorflame3-replayer"}, subscribe, ["factory/production/production-sensorflame3-replayer/command"]}.
+{allow, {username, "production-sensorflame4-replayer"}, publish,   ["factory/production/production-sensorflame4-replayer/telemetry"]}.
+{allow, {username, "production-sensorflame4-replayer"}, subscribe, ["factory/production/production-sensorflame4-replayer/command"]}.
+{allow, {username, "production-sensorflame5-replayer"}, publish,   ["factory/production/production-sensorflame5-replayer/telemetry"]}.
+{allow, {username, "production-sensorflame5-replayer"}, subscribe, ["factory/production/production-sensorflame5-replayer/command"]}.
+
+% -------- Smoke (1..5) --------
+{allow, {username, "production-sensorsmoke1-replayer"}, publish,   ["factory/production/production-sensorsmoke1-replayer/telemetry"]}.
+{allow, {username, "production-sensorsmoke1-replayer"}, subscribe, ["factory/production/production-sensorsmoke1-replayer/command"]}.
+{allow, {username, "production-sensorsmoke2-replayer"}, publish,   ["factory/production/production-sensorsmoke2-replayer/telemetry"]}.
+{allow, {username, "production-sensorsmoke2-replayer"}, subscribe, ["factory/production/production-sensorsmoke2-replayer/command"]}.
+{allow, {username, "production-sensorsmoke3-replayer"}, publish,   ["factory/production/production-sensorsmoke3-replayer/telemetry"]}.
+{allow, {username, "production-sensorsmoke3-replayer"}, subscribe, ["factory/production/production-sensorsmoke3-replayer/command"]}.
+{allow, {username, "production-sensorsmoke4-replayer"}, publish,   ["factory/production/production-sensorsmoke4-replayer/telemetry"]}.
+{allow, {username, "production-sensorsmoke4-replayer"}, subscribe, ["factory/production/production-sensorsmoke4-replayer/command"]}.
+{allow, {username, "production-sensorsmoke5-replayer"}, publish,   ["factory/production/production-sensorsmoke5-replayer/telemetry"]}.
+{allow, {username, "production-sensorsmoke5-replayer"}, subscribe, ["factory/production/production-sensorsmoke5-replayer/command"]}.
+
+% -------- AirQuality (1..10) --------
+{allow, {username, "production-sensorair1-replayer"}, publish,   ["factory/production/production-sensorair1-replayer/telemetry"]}.
+{allow, {username, "production-sensorair1-replayer"}, subscribe, ["factory/production/production-sensorair1-replayer/command"]}.
+{allow, {username, "production-sensorair2-replayer"}, publish,   ["factory/production/production-sensorair2-replayer/telemetry"]}.
+{allow, {username, "production-sensorair2-replayer"}, subscribe, ["factory/production/production-sensorair2-replayer/command"]}.
+{allow, {username, "production-sensorair3-replayer"}, publish,   ["factory/production/production-sensorair3-replayer/telemetry"]}.
+{allow, {username, "production-sensorair3-replayer"}, subscribe, ["factory/production/production-sensorair3-replayer/command"]}.
+{allow, {username, "production-sensorair4-replayer"}, publish,   ["factory/production/production-sensorair4-replayer/telemetry"]}.
+{allow, {username, "production-sensorair4-replayer"}, subscribe, ["factory/production/production-sensorair4-replayer/command"]}.
+{allow, {username, "production-sensorair5-replayer"}, publish,   ["factory/production/production-sensorair5-replayer/telemetry"]}.
+{allow, {username, "production-sensorair5-replayer"}, subscribe, ["factory/production/production-sensorair5-replayer/command"]}.
+{allow, {username, "production-sensorair6-replayer"}, publish,   ["factory/production/production-sensorair6-replayer/telemetry"]}.
+{allow, {username, "production-sensorair6-replayer"}, subscribe, ["factory/production/production-sensorair6-replayer/command"]}.
+{allow, {username, "production-sensorair7-replayer"}, publish,   ["factory/production/production-sensorair7-replayer/telemetry"]}.
+{allow, {username, "production-sensorair7-replayer"}, subscribe, ["factory/production/production-sensorair7-replayer/command"]}.
+{allow, {username, "production-sensorair8-replayer"}, publish,   ["factory/production/production-sensorair8-replayer/telemetry"]}.
+{allow, {username, "production-sensorair8-replayer"}, subscribe, ["factory/production/production-sensorair8-replayer/command"]}.
+{allow, {username, "production-sensorair9-replayer"}, publish,   ["factory/production/production-sensorair9-replayer/telemetry"]}.
+{allow, {username, "production-sensorair9-replayer"}, subscribe, ["factory/production/production-sensorair9-replayer/command"]}.
+{allow, {username, "production-sensorair10-replayer"}, publish,   ["factory/production/production-sensorair10-replayer/telemetry"]}.
+{allow, {username, "production-sensorair10-replayer"}, subscribe, ["factory/production/production-sensorair10-replayer/command"]}.
+
+% -------- FanSensor (1..5) --------
+{allow, {username, "production-sensorfan1-replayer"}, publish,   ["factory/production/production-sensorfan1-replayer/telemetry"]}.
+{allow, {username, "production-sensorfan1-replayer"}, subscribe, ["factory/production/production-sensorfan1-replayer/command"]}.
+{allow, {username, "production-sensorfan2-replayer"}, publish,   ["factory/production/production-sensorfan2-replayer/telemetry"]}.
+{allow, {username, "production-sensorfan2-replayer"}, subscribe, ["factory/production/production-sensorfan2-replayer/command"]}.
+{allow, {username, "production-sensorfan3-replayer"}, publish,   ["factory/production/production-sensorfan3-replayer/telemetry"]}.
+{allow, {username, "production-sensorfan3-replayer"}, subscribe, ["factory/production/production-sensorfan3-replayer/command"]}.
+{allow, {username, "production-sensorfan4-replayer"}, publish,   ["factory/production/production-sensorfan4-replayer/telemetry"]}.
+{allow, {username, "production-sensorfan4-replayer"}, subscribe, ["factory/production/production-sensorfan4-replayer/command"]}.
+{allow, {username, "production-sensorfan5-replayer"}, publish,   ["factory/production/production-sensorfan5-replayer/telemetry"]}.
+{allow, {username, "production-sensorfan5-replayer"}, subscribe, ["factory/production/production-sensorfan5-replayer/command"]}.
+
+% -------- FanSpeed (1..5) --------
+{allow, {username, "production-sensorfanspeed1-replayer"}, publish,   ["factory/production/production-sensorfanspeed1-replayer/telemetry"]}.
+{allow, {username, "production-sensorfanspeed1-replayer"}, subscribe, ["factory/production/production-sensorfanspeed1-replayer/command"]}.
+{allow, {username, "production-sensorfanspeed2-replayer"}, publish,   ["factory/production/production-sensorfanspeed2-replayer/telemetry"]}.
+{allow, {username, "production-sensorfanspeed2-replayer"}, subscribe, ["factory/production/production-sensorfanspeed2-replayer/command"]}.
+{allow, {username, "production-sensorfanspeed3-replayer"}, publish,   ["factory/production/production-sensorfanspeed3-replayer/telemetry"]}.
+{allow, {username, "production-sensorfanspeed3-replayer"}, subscribe, ["factory/production/production-sensorfanspeed3-replayer/command"]}.
+{allow, {username, "production-sensorfanspeed4-replayer"}, publish,   ["factory/production/production-sensorfanspeed4-replayer/telemetry"]}.
+{allow, {username, "production-sensorfanspeed4-replayer"}, subscribe, ["factory/production/production-sensorfanspeed4-replayer/command"]}.
+{allow, {username, "production-sensorfanspeed5-replayer"}, publish,   ["factory/production/production-sensorfanspeed5-replayer/telemetry"]}.
+{allow, {username, "production-sensorfanspeed5-replayer"}, subscribe, ["factory/production/production-sensorfanspeed5-replayer/command"]}.
+
+% ===================== SECURITY =====================
+
+% -------- DoorLock (1..20) --------
+{allow, {username, "security-sensor_door1"}, publish,   ["factory/security/security-sensor_door1/telemetry"]}.
+{allow, {username, "security-sensor_door1"}, subscribe, ["factory/security/security-sensor_door1/command"]}.
+{allow, {username, "security-sensor_door2"}, publish,   ["factory/security/security-sensor_door2/telemetry"]}.
+{allow, {username, "security-sensor_door2"}, subscribe, ["factory/security/security-sensor_door2/command"]}.
+{allow, {username, "security-sensor_door3"}, publish,   ["factory/security/security-sensor_door3/telemetry"]}.
+{allow, {username, "security-sensor_door3"}, subscribe, ["factory/security/security-sensor_door3/command"]}.
+{allow, {username, "security-sensor_door4"}, publish,   ["factory/security/security-sensor_door4/telemetry"]}.
+{allow, {username, "security-sensor_door4"}, subscribe, ["factory/security/security-sensor_door4/command"]}.
+{allow, {username, "security-sensor_door5"}, publish,   ["factory/security/security-sensor_door5/telemetry"]}.
+{allow, {username, "security-sensor_door5"}, subscribe, ["factory/security/security-sensor_door5/command"]}.
+{allow, {username, "security-sensor_door6"}, publish,   ["factory/security/security-sensor_door6/telemetry"]}.
+{allow, {username, "security-sensor_door6"}, subscribe, ["factory/security/security-sensor_door6/command"]}.
+{allow, {username, "security-sensor_door7"}, publish,   ["factory/security/security-sensor_door7/telemetry"]}.
+{allow, {username, "security-sensor_door7"}, subscribe, ["factory/security/security-sensor_door7/command"]}.
+{allow, {username, "security-sensor_door8"}, publish,   ["factory/security/security-sensor_door8/telemetry"]}.
+{allow, {username, "security-sensor_door8"}, subscribe, ["factory/security/security-sensor_door8/command"]}.
+{allow, {username, "security-sensor_door9"}, publish,   ["factory/security/security-sensor_door9/telemetry"]}.
+{allow, {username, "security-sensor_door9"}, subscribe, ["factory/security/security-sensor_door9/command"]}.
+{allow, {username, "security-sensor_door10"}, publish,   ["factory/security/security-sensor_door10/telemetry"]}.
+{allow, {username, "security-sensor_door10"}, subscribe, ["factory/security/security-sensor_door10/command"]}.
+{allow, {username, "security-sensor_door11"}, publish,   ["factory/security/security-sensor_door11/telemetry"]}.
+{allow, {username, "security-sensor_door11"}, subscribe, ["factory/security/security-sensor_door11/command"]}.
+{allow, {username, "security-sensor_door12"}, publish,   ["factory/security/security-sensor_door12/telemetry"]}.
+{allow, {username, "security-sensor_door12"}, subscribe, ["factory/security/security-sensor_door12/command"]}.
+{allow, {username, "security-sensor_door13"}, publish,   ["factory/security/security-sensor_door13/telemetry"]}.
+{allow, {username, "security-sensor_door13"}, subscribe, ["factory/security/security-sensor_door13/command"]}.
+{allow, {username, "security-sensor_door14"}, publish,   ["factory/security/security-sensor_door14/telemetry"]}.
+{allow, {username, "security-sensor_door14"}, subscribe, ["factory/security/security-sensor_door14/command"]}.
+{allow, {username, "security-sensor_door15"}, publish,   ["factory/security/security-sensor_door15/telemetry"]}.
+{allow, {username, "security-sensor_door15"}, subscribe, ["factory/security/security-sensor_door15/command"]}.
+{allow, {username, "security-sensor_door16"}, publish,   ["factory/security/security-sensor_door16/telemetry"]}.
+{allow, {username, "security-sensor_door16"}, subscribe, ["factory/security/security-sensor_door16/command"]}.
+{allow, {username, "security-sensor_door17"}, publish,   ["factory/security/security-sensor_door17/telemetry"]}.
+{allow, {username, "security-sensor_door17"}, subscribe, ["factory/security/security-sensor_door17/command"]}.
+{allow, {username, "security-sensor_door18"}, publish,   ["factory/security/security-sensor_door18/telemetry"]}.
+{allow, {username, "security-sensor_door18"}, subscribe, ["factory/security/security-sensor_door18/command"]}.
+{allow, {username, "security-sensor_door19"}, publish,   ["factory/security/security-sensor_door19/telemetry"]}.
+{allow, {username, "security-sensor_door19"}, subscribe, ["factory/security/security-sensor_door19/command"]}.
+{allow, {username, "security-sensor_door20"}, publish,   ["factory/security/security-sensor_door20/telemetry"]}.
+{allow, {username, "security-sensor_door20"}, subscribe, ["factory/security/security-sensor_door20/command"]}.
+
+% -------- CO-Gas (1..5) --------
+{allow, {username, "security-sensor_co1"}, publish,   ["factory/security/security-sensor_co1/telemetry"]}.
+{allow, {username, "security-sensor_co1"}, subscribe, ["factory/security/security-sensor_co1/command"]}.
+{allow, {username, "security-sensor_co2"}, publish,   ["factory/security/security-sensor_co2/telemetry"]}.
+{allow, {username, "security-sensor_co2"}, subscribe, ["factory/security/security-sensor_co2/command"]}.
+{allow, {username, "security-sensor_co3"}, publish,   ["factory/security/security-sensor_co3/telemetry"]}.
+{allow, {username, "security-sensor_co3"}, subscribe, ["factory/security/security-sensor_co3/command"]}.
+{allow, {username, "security-sensor_co4"}, publish,   ["factory/security/security-sensor_co4/telemetry"]}.
+{allow, {username, "security-sensor_co4"}, subscribe, ["factory/security/security-sensor_co4/command"]}.
+{allow, {username, "security-sensor_co5"}, publish,   ["factory/security/security-sensor_co5/telemetry"]}.
+{allow, {username, "security-sensor_co5"}, subscribe, ["factory/security/security-sensor_co5/command"]}.
+
+% -------- AirQuality (1..5) --------
+{allow, {username, "security-sensor_air1"}, publish,   ["factory/security/security-sensor_air1/telemetry"]}.
+{allow, {username, "security-sensor_air1"}, subscribe, ["factory/security/security-sensor_air1/command"]}.
+{allow, {username, "security-sensor_air2"}, publish,   ["factory/security/security-sensor_air2/telemetry"]}.
+{allow, {username, "security-sensor_air2"}, subscribe, ["factory/security/security-sensor_air2/command"]}.
+{allow, {username, "security-sensor_air3"}, publish,   ["factory/security/security-sensor_air3/telemetry"]}.
+{allow, {username, "security-sensor_air3"}, subscribe, ["factory/security/security-sensor_air3/command"]}.
+{allow, {username, "security-sensor_air4"}, publish,   ["factory/security/security-sensor_air4/telemetry"]}.
+{allow, {username, "security-sensor_air4"}, subscribe, ["factory/security/security-sensor_air4/command"]}.
+{allow, {username, "security-sensor_air5"}, publish,   ["factory/security/security-sensor_air5/telemetry"]}.
+{allow, {username, "security-sensor_air5"}, subscribe, ["factory/security/security-sensor_air5/command"]}.
+
+% -------- Smoke (1..3) --------
+{allow, {username, "security-sensor_smoke1"}, publish,   ["factory/security/security-sensor_smoke1/telemetry"]}.
+{allow, {username, "security-sensor_smoke1"}, subscribe, ["factory/security/security-sensor_smoke1/command"]}.
+{allow, {username, "security-sensor_smoke2"}, publish,   ["factory/security/security-sensor_smoke2/telemetry"]}.
+{allow, {username, "security-sensor_smoke2"}, subscribe, ["factory/security/security-sensor_smoke2/command"]}.
+{allow, {username, "security-sensor_smoke3"}, publish,   ["factory/security/security-sensor_smoke3/telemetry"]}.
+{allow, {username, "security-sensor_smoke3"}, subscribe, ["factory/security/security-sensor_smoke3/command"]}.
+
+% -------- FlameSensor (1..2) --------
+{allow, {username, "security-sensor_flame1"}, publish,   ["factory/security/security-sensor_flame1/telemetry"]}.
+{allow, {username, "security-sensor_flame1"}, subscribe, ["factory/security/security-sensor_flame1/command"]}.
+{allow, {username, "security-sensor_flame2"}, publish,   ["factory/security/security-sensor_flame2/telemetry"]}.
+{allow, {username, "security-sensor_flame2"}, subscribe, ["factory/security/security-sensor_flame2/command"]}.
+
+% -------- Camera (Motion) --------
+{allow, {username, "security-sensor_motion"}, publish,   ["factory/security/security-sensor_motion/telemetry"]}.
+{allow, {username, "security-sensor_motion"}, subscribe, ["factory/security/security-sensor_motion/command"]}.
+
+% ===================== STORAGE =====================
+
+% -------- Temperature (1..10) --------
+{allow, {username, "storage-sensor_temp1"}, publish,   ["factory/storage/storage-sensor_temp1/telemetry"]}.
+{allow, {username, "storage-sensor_temp1"}, subscribe, ["factory/storage/storage-sensor_temp1/command"]}.
+{allow, {username, "storage-sensor_temp2"}, publish,   ["factory/storage/storage-sensor_temp2/telemetry"]}.
+{allow, {username, "storage-sensor_temp2"}, subscribe, ["factory/storage/storage-sensor_temp2/command"]}.
+{allow, {username, "storage-sensor_temp3"}, publish,   ["factory/storage/storage-sensor_temp3/telemetry"]}.
+{allow, {username, "storage-sensor_temp3"}, subscribe, ["factory/storage/storage-sensor_temp3/command"]}.
+{allow, {username, "storage-sensor_temp4"}, publish,   ["factory/storage/storage-sensor_temp4/telemetry"]}.
+{allow, {username, "storage-sensor_temp4"}, subscribe, ["factory/storage/storage-sensor_temp4/command"]}.
+{allow, {username, "storage-sensor_temp5"}, publish,   ["factory/storage/storage-sensor_temp5/telemetry"]}.
+{allow, {username, "storage-sensor_temp5"}, subscribe, ["factory/storage/storage-sensor_temp5/command"]}.
+{allow, {username, "storage-sensor_temp6"}, publish,   ["factory/storage/storage-sensor_temp6/telemetry"]}.
+{allow, {username, "storage-sensor_temp6"}, subscribe, ["factory/storage/storage-sensor_temp6/command"]}.
+{allow, {username, "storage-sensor_temp7"}, publish,   ["factory/storage/storage-sensor_temp7/telemetry"]}.
+{allow, {username, "storage-sensor_temp7"}, subscribe, ["factory/storage/storage-sensor_temp7/command"]}.
+{allow, {username, "storage-sensor_temp8"}, publish,   ["factory/storage/storage-sensor_temp8/telemetry"]}.
+{allow, {username, "storage-sensor_temp8"}, subscribe, ["factory/storage/storage-sensor_temp8/command"]}.
+{allow, {username, "storage-sensor_temp9"}, publish,   ["factory/storage/storage-sensor_temp9/telemetry"]}.
+{allow, {username, "storage-sensor_temp9"}, subscribe, ["factory/storage/storage-sensor_temp9/command"]}.
+{allow, {username, "storage-sensor_temp10"}, publish,   ["factory/storage/storage-sensor_temp10/telemetry"]}.
+{allow, {username, "storage-sensor_temp10"}, subscribe, ["factory/storage/storage-sensor_temp10/command"]}.
+
+% -------- Humidity (1..10) --------
+{allow, {username, "storage-sensor_hum1"}, publish,   ["factory/storage/storage-sensor_hum1/telemetry"]}.
+{allow, {username, "storage-sensor_hum1"}, subscribe, ["factory/storage/storage-sensor_hum1/command"]}.
+{allow, {username, "storage-sensor_hum2"}, publish,   ["factory/storage/storage-sensor_hum2/telemetry"]}.
+{allow, {username, "storage-sensor_hum2"}, subscribe, ["factory/storage/storage-sensor_hum2/command"]}.
+{allow, {username, "storage-sensor_hum3"}, publish,   ["factory/storage/storage-sensor_hum3/telemetry"]}.
+{allow, {username, "storage-sensor_hum3"}, subscribe, ["factory/storage/storage-sensor_hum3/command"]}.
+{allow, {username, "storage-sensor_hum4"}, publish,   ["factory/storage/storage-sensor_hum4/telemetry"]}.
+{allow, {username, "storage-sensor_hum4"}, subscribe, ["factory/storage/storage-sensor_hum4/command"]}.
+{allow, {username, "storage-sensor_hum5"}, publish,   ["factory/storage/storage-sensor_hum5/telemetry"]}.
+{allow, {username, "storage-sensor_hum5"}, subscribe, ["factory/storage/storage-sensor_hum5/command"]}.
+{allow, {username, "storage-sensor_hum6"}, publish,   ["factory/storage/storage-sensor_hum6/telemetry"]}.
+{allow, {username, "storage-sensor_hum6"}, subscribe, ["factory/storage/storage-sensor_hum6/command"]}.
+{allow, {username, "storage-sensor_hum7"}, publish,   ["factory/storage/storage-sensor_hum7/telemetry"]}.
+{allow, {username, "storage-sensor_hum7"}, subscribe, ["factory/storage/storage-sensor_hum7/command"]}.
+{allow, {username, "storage-sensor_hum8"}, publish,   ["factory/storage/storage-sensor_hum8/telemetry"]}.
+{allow, {username, "storage-sensor_hum8"}, subscribe, ["factory/storage/storage-sensor_hum8/command"]}.
+{allow, {username, "storage-sensor_hum9"}, publish,   ["factory/storage/storage-sensor_hum9/telemetry"]}.
+{allow, {username, "storage-sensor_hum9"}, subscribe, ["factory/storage/storage-sensor_hum9/command"]}.
+{allow, {username, "storage-sensor_hum10"}, publish,   ["factory/storage/storage-sensor_hum10/telemetry"]}.
+{allow, {username, "storage-sensor_hum10"}, subscribe, ["factory/storage/storage-sensor_hum10/command"]}.
+
+% -------- CO-Gas (1..10) --------
+{allow, {username, "storage-sensor_co1"}, publish,   ["factory/storage/storage-sensor_co1/telemetry"]}.
+{allow, {username, "storage-sensor_co1"}, subscribe, ["factory/storage/storage-sensor_co1/command"]}.
+{allow, {username, "storage-sensor_co2"}, publish,   ["factory/storage/storage-sensor_co2/telemetry"]}.
+{allow, {username, "storage-sensor_co2"}, subscribe, ["factory/storage/storage-sensor_co2/command"]}.
+{allow, {username, "storage-sensor_co3"}, publish,   ["factory/storage/storage-sensor_co3/telemetry"]}.
+{allow, {username, "storage-sensor_co3"}, subscribe, ["factory/storage/storage-sensor_co3/command"]}.
+{allow, {username, "storage-sensor_co4"}, publish,   ["factory/storage/storage-sensor_co4/telemetry"]}.
+{allow, {username, "storage-sensor_co4"}, subscribe, ["factory/storage/storage-sensor_co4/command"]}.
+{allow, {username, "storage-sensor_co5"}, publish,   ["factory/storage/storage-sensor_co5/telemetry"]}.
+{allow, {username, "storage-sensor_co5"}, subscribe, ["factory/storage/storage-sensor_co5/command"]}.
+{allow, {username, "storage-sensor_co6"}, publish,   ["factory/storage/storage-sensor_co6/telemetry"]}.
+{allow, {username, "storage-sensor_co6"}, subscribe, ["factory/storage/storage-sensor_co6/command"]}.
+{allow, {username, "storage-sensor_co7"}, publish,   ["factory/storage/storage-sensor_co7/telemetry"]}.
+{allow, {username, "storage-sensor_co7"}, subscribe, ["factory/storage/storage-sensor_co7/command"]}.
+{allow, {username, "storage-sensor_co8"}, publish,   ["factory/storage/storage-sensor_co8/telemetry"]}.
+{allow, {username, "storage-sensor_co8"}, subscribe, ["factory/storage/storage-sensor_co8/command"]}.
+{allow, {username, "storage-sensor_co9"}, publish,   ["factory/storage/storage-sensor_co9/telemetry"]}.
+{allow, {username, "storage-sensor_co9"}, subscribe, ["factory/storage/storage-sensor_co9/command"]}.
+{allow, {username, "storage-sensor_co10"}, publish,   ["factory/storage/storage-sensor_co10/telemetry"]}.
+{allow, {username, "storage-sensor_co10"}, subscribe, ["factory/storage/storage-sensor_co10/command"]}.
+
+% -------- Smoke (1..10) --------
+{allow, {username, "storage-sensor_smoke1"}, publish,   ["factory/storage/storage-sensor_smoke1/telemetry"]}.
+{allow, {username, "storage-sensor_smoke1"}, subscribe, ["factory/storage/storage-sensor_smoke1/command"]}.
+{allow, {username, "storage-sensor_smoke2"}, publish,   ["factory/storage/storage-sensor_smoke2/telemetry"]}.
+{allow, {username, "storage-sensor_smoke2"}, subscribe, ["factory/storage/storage-sensor_smoke2/command"]}.
+{allow, {username, "storage-sensor_smoke3"}, publish,   ["factory/storage/storage-sensor_smoke3/telemetry"]}.
+{allow, {username, "storage-sensor_smoke3"}, subscribe, ["factory/storage/storage-sensor_smoke3/command"]}.
+{allow, {username, "storage-sensor_smoke4"}, publish,   ["factory/storage/storage-sensor_smoke4/telemetry"]}.
+{allow, {username, "storage-sensor_smoke4"}, subscribe, ["factory/storage/storage-sensor_smoke4/command"]}.
+{allow, {username, "storage-sensor_smoke5"}, publish,   ["factory/storage/storage-sensor_smoke5/telemetry"]}.
+{allow, {username, "storage-sensor_smoke5"}, subscribe, ["factory/storage/storage-sensor_smoke5/command"]}.
+{allow, {username, "storage-sensor_smoke6"}, publish,   ["factory/storage/storage-sensor_smoke6/telemetry"]}.
+{allow, {username, "storage-sensor_smoke6"}, subscribe, ["factory/storage/storage-sensor_smoke6/command"]}.
+{allow, {username, "storage-sensor_smoke7"}, publish,   ["factory/storage/storage-sensor_smoke7/telemetry"]}.
+{allow, {username, "storage-sensor_smoke7"}, subscribe, ["factory/storage/storage-sensor_smoke7/command"]}.
+{allow, {username, "storage-sensor_smoke8"}, publish,   ["factory/storage/storage-sensor_smoke8/telemetry"]}.
+{allow, {username, "storage-sensor_smoke8"}, subscribe, ["factory/storage/storage-sensor_smoke8/command"]}.
+{allow, {username, "storage-sensor_smoke9"}, publish,   ["factory/storage/storage-sensor_smoke9/telemetry"]}.
+{allow, {username, "storage-sensor_smoke9"}, subscribe, ["factory/storage/storage-sensor_smoke9/command"]}.
+{allow, {username, "storage-sensor_smoke10"}, publish,   ["factory/storage/storage-sensor_smoke10/telemetry"]}.
+{allow, {username, "storage-sensor_smoke10"}, subscribe, ["factory/storage/storage-sensor_smoke10/command"]}.
+
+% -------- FlameSensor (1..10) --------
+{allow, {username, "storage-sensor_flame1"}, publish,   ["factory/storage/storage-sensor_flame1/telemetry"]}.
+{allow, {username, "storage-sensor_flame1"}, subscribe, ["factory/storage/storage-sensor_flame1/command"]}.
+{allow, {username, "storage-sensor_flame2"}, publish,   ["factory/storage/storage-sensor_flame2/telemetry"]}.
+{allow, {username, "storage-sensor_flame2"}, subscribe, ["factory/storage/storage-sensor_flame2/command"]}.
+{allow, {username, "storage-sensor_flame3"}, publish,   ["factory/storage/storage-sensor_flame3/telemetry"]}.
+{allow, {username, "storage-sensor_flame3"}, subscribe, ["factory/storage/storage-sensor_flame3/command"]}.
+{allow, {username, "storage-sensor_flame4"}, publish,   ["factory/storage/storage-sensor_flame4/telemetry"]}.
+{allow, {username, "storage-sensor_flame4"}, subscribe, ["factory/storage/storage-sensor_flame4/command"]}.
+{allow, {username, "storage-sensor_flame5"}, publish,   ["factory/storage/storage-sensor_flame5/telemetry"]}.
+{allow, {username, "storage-sensor_flame5"}, subscribe, ["factory/storage/storage-sensor_flame5/command"]}.
+{allow, {username, "storage-sensor_flame6"}, publish,   ["factory/storage/storage-sensor_flame6/telemetry"]}.
+{allow, {username, "storage-sensor_flame6"}, subscribe, ["factory/storage/storage-sensor_flame6/command"]}.
+{allow, {username, "storage-sensor_flame7"}, publish,   ["factory/storage/storage-sensor_flame7/telemetry"]}.
+{allow, {username, "storage-sensor_flame7"}, subscribe, ["factory/storage/storage-sensor_flame7/command"]}.
+{allow, {username, "storage-sensor_flame8"}, publish,   ["factory/storage/storage-sensor_flame8/telemetry"]}.
+{allow, {username, "storage-sensor_flame8"}, subscribe, ["factory/storage/storage-sensor_flame8/command"]}.
+{allow, {username, "storage-sensor_flame9"}, publish,   ["factory/storage/storage-sensor_flame9/telemetry"]}.
+{allow, {username, "storage-sensor_flame9"}, subscribe, ["factory/storage/storage-sensor_flame9/command"]}.
+{allow, {username, "storage-sensor_flame10"}, publish,   ["factory/storage/storage-sensor_flame10/telemetry"]}.
+{allow, {username, "storage-sensor_flame10"}, subscribe, ["factory/storage/storage-sensor_flame10/command"]}.
+
+% -------- Light (1..10) --------
+{allow, {username, "storage-sensor_light1"}, publish,   ["factory/storage/storage-sensor_light1/telemetry"]}.
+{allow, {username, "storage-sensor_light1"}, subscribe, ["factory/storage/storage-sensor_light1/command"]}.
+{allow, {username, "storage-sensor_light2"}, publish,   ["factory/storage/storage-sensor_light2/telemetry"]}.
+{allow, {username, "storage-sensor_light2"}, subscribe, ["factory/storage/storage-sensor_light2/command"]}.
+{allow, {username, "storage-sensor_light3"}, publish,   ["factory/storage/storage-sensor_light3/telemetry"]}.
+{allow, {username, "storage-sensor_light3"}, subscribe, ["factory/storage/storage-sensor_light3/command"]}.
+{allow, {username, "storage-sensor_light4"}, publish,   ["factory/storage/storage-sensor_light4/telemetry"]}.
+{allow, {username, "storage-sensor_light4"}, subscribe, ["factory/storage/storage-sensor_light4/command"]}.
+{allow, {username, "storage-sensor_light5"}, publish,   ["factory/storage/storage-sensor_light5/telemetry"]}.
+{allow, {username, "storage-sensor_light5"}, subscribe, ["factory/storage/storage-sensor_light5/command"]}.
+{allow, {username, "storage-sensor_light6"}, publish,   ["factory/storage/storage-sensor_light6/telemetry"]}.
+{allow, {username, "storage-sensor_light6"}, subscribe, ["factory/storage/storage-sensor_light6/command"]}.
+{allow, {username, "storage-sensor_light7"}, publish,   ["factory/storage/storage-sensor_light7/telemetry"]}.
+{allow, {username, "storage-sensor_light7"}, subscribe, ["factory/storage/storage-sensor_light7/command"]}.
+{allow, {username, "storage-sensor_light8"}, publish,   ["factory/storage/storage-sensor_light8/telemetry"]}.
+{allow, {username, "storage-sensor_light8"}, subscribe, ["factory/storage/storage-sensor_light8/command"]}.
+{allow, {username, "storage-sensor_light9"}, publish,   ["factory/storage/storage-sensor_light9/telemetry"]}.
+{allow, {username, "storage-sensor_light9"}, subscribe, ["factory/storage/storage-sensor_light9/command"]}.
+{allow, {username, "storage-sensor_light10"}, publish,   ["factory/storage/storage-sensor_light10/telemetry"]}.
+{allow, {username, "storage-sensor_light10"}, subscribe, ["factory/storage/storage-sensor_light10/command"]}.
+
+% -------- SoundSensor (1..10) --------
+{allow, {username, "storage-sensor_sound1"}, publish,   ["factory/storage/storage-sensor_sound1/telemetry"]}.
+{allow, {username, "storage-sensor_sound1"}, subscribe, ["factory/storage/storage-sensor_sound1/command"]}.
+{allow, {username, "storage-sensor_sound2"}, publish,   ["factory/storage/storage-sensor_sound2/telemetry"]}.
+{allow, {username, "storage-sensor_sound2"}, subscribe, ["factory/storage/storage-sensor_sound2/command"]}.
+{allow, {username, "storage-sensor_sound3"}, publish,   ["factory/storage/storage-sensor_sound3/telemetry"]}.
+{allow, {username, "storage-sensor_sound3"}, subscribe, ["factory/storage/storage-sensor_sound3/command"]}.
+{allow, {username, "storage-sensor_sound4"}, publish,   ["factory/storage/storage-sensor_sound4/telemetry"]}.
+{allow, {username, "storage-sensor_sound4"}, subscribe, ["factory/storage/storage-sensor_sound4/command"]}.
+{allow, {username, "storage-sensor_sound5"}, publish,   ["factory/storage/storage-sensor_sound5/telemetry"]}.
+{allow, {username, "storage-sensor_sound5"}, subscribe, ["factory/storage/storage-sensor_sound5/command"]}.
+{allow, {username, "storage-sensor_sound6"}, publish,   ["factory/storage/storage-sensor_sound6/telemetry"]}.
+{allow, {username, "storage-sensor_sound6"}, subscribe, ["factory/storage/storage-sensor_sound6/command"]}.
+{allow, {username, "storage-sensor_sound7"}, publish,   ["factory/storage/storage-sensor_sound7/telemetry"]}.
+{allow, {username, "storage-sensor_sound7"}, subscribe, ["factory/storage/storage-sensor_sound7/command"]}.
+{allow, {username, "storage-sensor_sound8"}, publish,   ["factory/storage/storage-sensor_sound8/telemetry"]}.
+{allow, {username, "storage-sensor_sound8"}, subscribe, ["factory/storage/storage-sensor_sound8/command"]}.
+{allow, {username, "storage-sensor_sound9"}, publish,   ["factory/storage/storage-sensor_sound9/telemetry"]}.
+{allow, {username, "storage-sensor_sound9"}, subscribe, ["factory/storage/storage-sensor_sound9/command"]}.
+{allow, {username, "storage-sensor_sound10"}, publish,   ["factory/storage/storage-sensor_sound10/telemetry"]}.
+{allow, {username, "storage-sensor_sound10"}, subscribe, ["factory/storage/storage-sensor_sound10/command"]}.
+
+% -------- WaterLevel (1..10) --------
+{allow, {username, "storage-sensor_water1"}, publish,   ["factory/storage/storage-sensor_water1/telemetry"]}.
+{allow, {username, "storage-sensor_water1"}, subscribe, ["factory/storage/storage-sensor_water1/command"]}.
+{allow, {username, "storage-sensor_water2"}, publish,   ["factory/storage/storage-sensor_water2/telemetry"]}.
+{allow, {username, "storage-sensor_water2"}, subscribe, ["factory/storage/storage-sensor_water2/command"]}.
+{allow, {username, "storage-sensor_water3"}, publish,   ["factory/storage/storage-sensor_water3/telemetry"]}.
+{allow, {username, "storage-sensor_water3"}, subscribe, ["factory/storage/storage-sensor_water3/command"]}.
+{allow, {username, "storage-sensor_water4"}, publish,   ["factory/storage/storage-sensor_water4/telemetry"]}.
+{allow, {username, "storage-sensor_water4"}, subscribe, ["factory/storage/storage-sensor_water4/command"]}.
+{allow, {username, "storage-sensor_water5"}, publish,   ["factory/storage/storage-sensor_water5/telemetry"]}.
+{allow, {username, "storage-sensor_water5"}, subscribe, ["factory/storage/storage-sensor_water5/command"]}.
+{allow, {username, "storage-sensor_water6"}, publish,   ["factory/storage/storage-sensor_water6/telemetry"]}.
+{allow, {username, "storage-sensor_water6"}, subscribe, ["factory/storage/storage-sensor_water6/command"]}.
+{allow, {username, "storage-sensor_water7"}, publish,   ["factory/storage/storage-sensor_water7/telemetry"]}.
+{allow, {username, "storage-sensor_water7"}, subscribe, ["factory/storage/storage-sensor_water7/command"]}.
+{allow, {username, "storage-sensor_water8"}, publish,   ["factory/storage/storage-sensor_water8/telemetry"]}.
+{allow, {username, "storage-sensor_water8"}, subscribe, ["factory/storage/storage-sensor_water8/command"]}.
+{allow, {username, "storage-sensor_water9"}, publish,   ["factory/storage/storage-sensor_water9/telemetry"]}.
+{allow, {username, "storage-sensor_water9"}, subscribe, ["factory/storage/storage-sensor_water9/command"]}.
+{allow, {username, "storage-sensor_water10"}, publish,   ["factory/storage/storage-sensor_water10/telemetry"]}.
+{allow, {username, "storage-sensor_water10"}, subscribe, ["factory/storage/storage-sensor_water10/command"]}.
+
+% -------- DistanceSensor (1..10) --------
+{allow, {username, "storage-sensor_distance1"}, publish,   ["factory/storage/storage-sensor_distance1/telemetry"]}.
+{allow, {username, "storage-sensor_distance1"}, subscribe, ["factory/storage/storage-sensor_distance1/command"]}.
+{allow, {username, "storage-sensor_distance2"}, publish,   ["factory/storage/storage-sensor_distance2/telemetry"]}.
+{allow, {username, "storage-sensor_distance2"}, subscribe, ["factory/storage/storage-sensor_distance2/command"]}.
+{allow, {username, "storage-sensor_distance3"}, publish,   ["factory/storage/storage-sensor_distance3/telemetry"]}.
+{allow, {username, "storage-sensor_distance3"}, subscribe, ["factory/storage/storage-sensor_distance3/command"]}.
+{allow, {username, "storage-sensor_distance4"}, publish,   ["factory/storage/storage-sensor_distance4/telemetry"]}.
+{allow, {username, "storage-sensor_distance4"}, subscribe, ["factory/storage/storage-sensor_distance4/command"]}.
+{allow, {username, "storage-sensor_distance5"}, publish,   ["factory/storage/storage-sensor_distance5/telemetry"]}.
+{allow, {username, "storage-sensor_distance5"}, subscribe, ["factory/storage/storage-sensor_distance5/command"]}.
+{allow, {username, "storage-sensor_distance6"}, publish,   ["factory/storage/storage-sensor_distance6/telemetry"]}.
+{allow, {username, "storage-sensor_distance6"}, subscribe, ["factory/storage/storage-sensor_distance6/command"]}.
+{allow, {username, "storage-sensor_distance7"}, publish,   ["factory/storage/storage-sensor_distance7/telemetry"]}.
+{allow, {username, "storage-sensor_distance7"}, subscribe, ["factory/storage/storage-sensor_distance7/command"]}.
+{allow, {username, "storage-sensor_distance8"}, publish,   ["factory/storage/storage-sensor_distance8/telemetry"]}.
+{allow, {username, "storage-sensor_distance8"}, subscribe, ["factory/storage/storage-sensor_distance8/command"]}.
+{allow, {username, "storage-sensor_distance9"}, publish,   ["factory/storage/storage-sensor_distance9/telemetry"]}.
+{allow, {username, "storage-sensor_distance9"}, subscribe, ["factory/storage/storage-sensor_distance9/command"]}.
+{allow, {username, "storage-sensor_distance10"}, publish,   ["factory/storage/storage-sensor_distance10/telemetry"]}.
+{allow, {username, "storage-sensor_distance10"}, subscribe, ["factory/storage/storage-sensor_distance10/command"]}.
+
+% -------- PhLevel (1..10) --------
+{allow, {username, "storage-sensor_ph1"}, publish,   ["factory/storage/storage-sensor_ph1/telemetry"]}.
+{allow, {username, "storage-sensor_ph1"}, subscribe, ["factory/storage/storage-sensor_ph1/command"]}.
+{allow, {username, "storage-sensor_ph2"}, publish,   ["factory/storage/storage-sensor_ph2/telemetry"]}.
+{allow, {username, "storage-sensor_ph2"}, subscribe, ["factory/storage/storage-sensor_ph2/command"]}.
+{allow, {username, "storage-sensor_ph3"}, publish,   ["factory/storage/storage-sensor_ph3/telemetry"]}.
+{allow, {username, "storage-sensor_ph3"}, subscribe, ["factory/storage/storage-sensor_ph3/command"]}.
+{allow, {username, "storage-sensor_ph4"}, publish,   ["factory/storage/storage-sensor_ph4/telemetry"]}.
+{allow, {username, "storage-sensor_ph4"}, subscribe, ["factory/storage/storage-sensor_ph4/command"]}.
+{allow, {username, "storage-sensor_ph5"}, publish,   ["factory/storage/storage-sensor_ph5/telemetry"]}.
+{allow, {username, "storage-sensor_ph5"}, subscribe, ["factory/storage/storage-sensor_ph5/command"]}.
+{allow, {username, "storage-sensor_ph6"}, publish,   ["factory/storage/storage-sensor_ph6/telemetry"]}.
+{allow, {username, "storage-sensor_ph6"}, subscribe, ["factory/storage/storage-sensor_ph6/command"]}.
+{allow, {username, "storage-sensor_ph7"}, publish,   ["factory/storage/storage-sensor_ph7/telemetry"]}.
+{allow, {username, "storage-sensor_ph7"}, subscribe, ["factory/storage/storage-sensor_ph7/command"]}.
+{allow, {username, "storage-sensor_ph8"}, publish,   ["factory/storage/storage-sensor_ph8/telemetry"]}.
+{allow, {username, "storage-sensor_ph8"}, subscribe, ["factory/storage/storage-sensor_ph8/command"]}.
+{allow, {username, "storage-sensor_ph9"}, publish,   ["factory/storage/storage-sensor_ph9/telemetry"]}.
+{allow, {username, "storage-sensor_ph9"}, subscribe, ["factory/storage/storage-sensor_ph9/command"]}.
+{allow, {username, "storage-sensor_ph10"}, publish,   ["factory/storage/storage-sensor_ph10/telemetry"]}.
+{allow, {username, "storage-sensor_ph10"}, subscribe, ["factory/storage/storage-sensor_ph10/command"]}.
+
+% -------- SoilMoisture (1..10) --------
+{allow, {username, "storage-sensor_soil1"}, publish,   ["factory/storage/storage-sensor_soil1/telemetry"]}.
+{allow, {username, "storage-sensor_soil1"}, subscribe, ["factory/storage/storage-sensor_soil1/command"]}.
+{allow, {username, "storage-sensor_soil2"}, publish,   ["factory/storage/storage-sensor_soil2/telemetry"]}.
+{allow, {username, "storage-sensor_soil2"}, subscribe, ["factory/storage/storage-sensor_soil2/command"]}.
+{allow, {username, "storage-sensor_soil3"}, publish,   ["factory/storage/storage-sensor_soil3/telemetry"]}.
+{allow, {username, "storage-sensor_soil3"}, subscribe, ["factory/storage/storage-sensor_soil3/command"]}.
+{allow, {username, "storage-sensor_soil4"}, publish,   ["factory/storage/storage-sensor_soil4/telemetry"]}.
+{allow, {username, "storage-sensor_soil4"}, subscribe, ["factory/storage/storage-sensor_soil4/command"]}.
+{allow, {username, "storage-sensor_soil5"}, publish,   ["factory/storage/storage-sensor_soil5/telemetry"]}.
+{allow, {username, "storage-sensor_soil5"}, subscribe, ["factory/storage/storage-sensor_soil5/command"]}.
+{allow, {username, "storage-sensor_soil6"}, publish,   ["factory/storage/storage-sensor_soil6/telemetry"]}.
+{allow, {username, "storage-sensor_soil6"}, subscribe, ["factory/storage/storage-sensor_soil6/command"]}.
+{allow, {username, "storage-sensor_soil7"}, publish,   ["factory/storage/storage-sensor_soil7/telemetry"]}.
+{allow, {username, "storage-sensor_soil7"}, subscribe, ["factory/storage/storage-sensor_soil7/command"]}.
+{allow, {username, "storage-sensor_soil8"}, publish,   ["factory/storage/storage-sensor_soil8/telemetry"]}.
+{allow, {username, "storage-sensor_soil8"}, subscribe, ["factory/storage/storage-sensor_soil8/command"]}.
+{allow, {username, "storage-sensor_soil9"}, publish,   ["factory/storage/storage-sensor_soil9/telemetry"]}.
+{allow, {username, "storage-sensor_soil9"}, subscribe, ["factory/storage/storage-sensor_soil9/command"]}.
+{allow, {username, "storage-sensor_soil10"}, publish,   ["factory/storage/storage-sensor_soil10/telemetry"]}.
+{allow, {username, "storage-sensor_soil10"}, subscribe, ["factory/storage/storage-sensor_soil10/command"]}.
+
+% -------- Camera (Motion) --------
+{allow, {username, "storage-sensor_motion"}, publish,   ["factory/storage/storage-sensor_motion/telemetry"]}.
+{allow, {username, "storage-sensor_motion"}, subscribe, ["factory/storage/storage-sensor_motion/command"]}.
+
+% ===================== FINAL CATCH-ALL =====================
 {deny, all}.
