@@ -1,0 +1,79 @@
+% ---------- EMQX File Authorizer ACL (factory/office) ----------
+% Require: Authorization -> Settings -> No match = deny
+
+% Allow dashboard users to read $SYS
+{allow, {username, {re, "dashboard.*"}}, subscribe, ["$SYS/#"]}.
+
+% (Optional) Localhost convenience - remove for production
+{allow, {ipaddr, "127.0.0.1"}, all, ["$SYS/#", "#"]}.
+
+% Block $SYS and blanket "#" subscriptions for everyone
+{deny, all, subscribe, ["$SYS/#", {eq, "#"}]}.
+
+% -------- Devices: Temperature --------
+{allow, {username, "sensor_temp1"}, publish,   ["factory/office/sensor_temp1/telemetry"]}.
+{allow, {username, "sensor_temp1"}, subscribe, ["factory/office/sensor_temp1/command"]}.
+{allow, {username, "sensor_temp2"}, publish,   ["factory/office/sensor_temp2/telemetry"]}.
+{allow, {username, "sensor_temp2"}, subscribe, ["factory/office/sensor_temp2/command"]}.
+{allow, {username, "sensor_temp3"}, publish,   ["factory/office/sensor_temp3/telemetry"]}.
+{allow, {username, "sensor_temp3"}, subscribe, ["factory/office/sensor_temp3/command"]}.
+{allow, {username, "sensor_temp4"}, publish,   ["factory/office/sensor_temp4/telemetry"]}.
+{allow, {username, "sensor_temp4"}, subscribe, ["factory/office/sensor_temp4/command"]}.
+{allow, {username, "sensor_temp5"}, publish,   ["factory/office/sensor_temp5/telemetry"]}.
+{allow, {username, "sensor_temp5"}, subscribe, ["factory/office/sensor_temp5/command"]}.
+{allow, {username, "sensor_temp6"}, publish,   ["factory/office/sensor_temp6/telemetry"]}.
+{allow, {username, "sensor_temp6"}, subscribe, ["factory/office/sensor_temp6/command"]}.
+{allow, {username, "sensor_temp7"}, publish,   ["factory/office/sensor_temp7/telemetry"]}.
+{allow, {username, "sensor_temp7"}, subscribe, ["factory/office/sensor_temp7/command"]}.
+{allow, {username, "sensor_temp8"}, publish,   ["factory/office/sensor_temp8/telemetry"]}.
+{allow, {username, "sensor_temp8"}, subscribe, ["factory/office/sensor_temp8/command"]}.
+
+% -------- Devices: Humidity --------
+{allow, {username, "sensor_hum1"}, publish,   ["factory/office/sensor_hum1/telemetry"]}.
+{allow, {username, "sensor_hum1"}, subscribe, ["factory/office/sensor_hum1/command"]}.
+{allow, {username, "sensor_hum2"}, publish,   ["factory/office/sensor_hum2/telemetry"]}.
+{allow, {username, "sensor_hum2"}, subscribe, ["factory/office/sensor_hum2/command"]}.
+{allow, {username, "sensor_hum3"}, publish,   ["factory/office/sensor_hum3/telemetry"]}.
+{allow, {username, "sensor_hum3"}, subscribe, ["factory/office/sensor_hum3/command"]}.
+{allow, {username, "sensor_hum4"}, publish,   ["factory/office/sensor_hum4/telemetry"]}.
+{allow, {username, "sensor_hum4"}, subscribe, ["factory/office/sensor_hum4/command"]}.
+{allow, {username, "sensor_hum5"}, publish,   ["factory/office/sensor_hum5/telemetry"]}.
+{allow, {username, "sensor_hum5"}, subscribe, ["factory/office/sensor_hum5/command"]}.
+{allow, {username, "sensor_hum6"}, publish,   ["factory/office/sensor_hum6/telemetry"]}.
+{allow, {username, "sensor_hum6"}, subscribe, ["factory/office/sensor_hum6/command"]}.
+{allow, {username, "sensor_hum7"}, publish,   ["factory/office/sensor_hum7/telemetry"]}.
+{allow, {username, "sensor_hum7"}, subscribe, ["factory/office/sensor_hum7/command"]}.
+{allow, {username, "sensor_hum8"}, publish,   ["factory/office/sensor_hum8/telemetry"]}.
+{allow, {username, "sensor_hum8"}, subscribe, ["factory/office/sensor_hum8/command"]}.
+
+% -------- Devices: Light --------
+{allow, {username, "sensor_light1"}, publish,   ["factory/office/sensor_light1/telemetry"]}.
+{allow, {username, "sensor_light1"}, subscribe, ["factory/office/sensor_light1/command"]}.
+{allow, {username, "sensor_light2"}, publish,   ["factory/office/sensor_light2/telemetry"]}.
+{allow, {username, "sensor_light2"}, subscribe, ["factory/office/sensor_light2/command"]}.
+{allow, {username, "sensor_light3"}, publish,   ["factory/office/sensor_light3/telemetry"]}.
+{allow, {username, "sensor_light3"}, subscribe, ["factory/office/sensor_light3/command"]}.
+{allow, {username, "sensor_light4"}, publish,   ["factory/office/sensor_light4/telemetry"]}.
+{allow, {username, "sensor_light4"}, subscribe, ["factory/office/sensor_light4/command"]}.
+{allow, {username, "sensor_light5"}, publish,   ["factory/office/sensor_light5/telemetry"]}.
+{allow, {username, "sensor_light5"}, subscribe, ["factory/office/sensor_light5/command"]}.
+
+% -------- Devices: DoorLock --------
+{allow, {username, "sensor_door1"}, publish,   ["factory/office/sensor_door1/telemetry"]}.
+{allow, {username, "sensor_door1"}, subscribe, ["factory/office/sensor_door1/command"]}.
+{allow, {username, "sensor_door2"}, publish,   ["factory/office/sensor_door2/telemetry"]}.
+{allow, {username, "sensor_door2"}, subscribe, ["factory/office/sensor_door2/command"]}.
+{allow, {username, "sensor_door3"}, publish,   ["factory/office/sensor_door3/telemetry"]}.
+{allow, {username, "sensor_door3"}, subscribe, ["factory/office/sensor_door3/command"]}.
+{allow, {username, "sensor_door4"}, publish,   ["factory/office/sensor_door4/telemetry"]}.
+{allow, {username, "sensor_door4"}, subscribe, ["factory/office/sensor_door4/command"]}.
+{allow, {username, "sensor_door5"}, publish,   ["factory/office/sensor_door5/telemetry"]}.
+{allow, {username, "sensor_door5"}, subscribe, ["factory/office/sensor_door5/command"]}.
+% --- Telegraf subscriber (read all telemetry) ---
+{allow, {username, "telegraf"}, subscribe, [
+    "factory/+/+/telemetry",
+    "$share/telegraf/factory/+/+/telemetry"   % if you use shared subs
+]}.
+
+% Final catch-all so this source never returns "no_match"
+{deny, all}.

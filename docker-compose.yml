@@ -1,0 +1,126 @@
+version: "3.9"
+
+services:
+  # ==========================================================
+  # 🟢 EMQX MQTT Broker
+  # ==========================================================
+  emqx:
+    image: emqx/emqx:5.0.13
+    container_name: emqx
+    restart: unless-stopped
+    ports:
+      - "1883:1883" # MQTT (non-TLS)
+      - "8883:8883" # MQTT over TLS
+      - "18083:18083" # Dashboard
+    environment:
+      # --- Dashboard
+      - EMQX_DASHBOARD__DEFAULT_USERNAME=admin
+      - EMQX_DASHBOARD__DEFAULT_PASSWORD=public
+
+      # --- Authentication (built-in DB / password_based)
+      - EMQX_AUTHENTICATION__1__ENABLE=true
+      - EMQX_AUTHENTICATION__1__MECHANISM=password_based
+      - EMQX_AUTHENTICATION__1__BACKEND=built_in_database
+      # If importing sha256(salt||password):
+      - EMQX_AUTHENTICATION__1__PASSWORD_HASH_ALGORITHM__NAME=sha256
+      - EMQX_AUTHENTICATION__1__PASSWORD_HASH_ALGORITHM__SALT_POSITION=prefix
+      # (Or use bcrypt instead and POST cleartext passwords)
+
+      # --- Authorization posture
+      - EMQX_AUTHORIZATION__NO_MATCH=deny
+
+      # sources.1 must stay 'file' because default includes file-only fields like 'path'
+      - EMQX_AUTHORIZATION__SOURCES__1__TYPE=file
+      - EMQX_AUTHORIZATION__SOURCES__1__ENABLE=true
+      - EMQX_AUTHORIZATION__SOURCES__1__PATH=/opt/emqx/etc/acl.conf # required by 'file' schema even if disabled
+
+      # add built-in DB authorizer as sources.2
+      - EMQX_AUTHORIZATION__SOURCES__2__TYPE=built_in_database
+      - EMQX_AUTHORIZATION__SOURCES__2__ENABLE=false
+
+      # (optional) quiet the cookie warning
+      - EMQX_NODE__COOKIE=dev_cookie_change_me
+
+    volumes:
+      - ./certs:/opt/emqx/etc/certs:ro
+    networks:
+      - iot-net
+
+  # ==========================================================
+  # 🟣 InfluxDB 2.7 - Time Series Database
+  # ==========================================================
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
+      - DOCKER_INFLUXDB_INIT_ORG=iot-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=iot-data
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=iot-admin-token-123
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    networks:
+      - iot-net
+
+  # ==========================================================
+  # 🟠 Grafana Dashboard
+  # ==========================================================
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - iot-net
+
+  # ==========================================================
+  # 🧩 Telegraf Agent
+  # ==========================================================
+  telegraf:
+    image: telegraf:1.28
+    container_name: telegraf
+    restart: unless-stopped
+    depends_on:
+      - emqx
+      - influxdb
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/host/sys:ro
+      - /proc:/host/proc:ro
+      - /etc:/host/etc:ro
+      - ./certs/ca-cert.pem:/etc/telegraf/certs/ca-cert.pem:ro
+    environment:
+      - HOST_ETC=/host/etc
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+    networks:
+      - iot-net
+
+# ==========================================================
+# Persistent Volumes
+# ==========================================================
+volumes:
+  influxdb-data:
+  grafana-data:
+
+# ==========================================================
+# Virtual Network (for all containers)
+# ==========================================================
+networks:
+  iot-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
