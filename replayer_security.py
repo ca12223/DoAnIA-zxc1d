@@ -116,6 +116,19 @@ def mk_client(client_id: str, username: Optional[str] = None) -> mqtt.Client:
     c = mqtt.Client(client_id=client_id)
     if username:
         c.username_pw_set(username)
+    import ssl, os
+
+    ca_path = os.path.join(os.path.dirname(__file__), "certs", "ca-cert.pem")
+
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=ca_path)
+    ctx.check_hostname = True          # SAN includes emqx/localhost/127.0.0.1
+    ctx.verify_mode = ssl.CERT_REQUIRED
+
+    # If your Windows Python still hits the RSA-PSS bug, you can temporarily pin TLS 1.2:
+    # ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+    # ctx.maximum_version = ssl.TLSVersion.TLSv1_2
+
+    c.tls_set_context(ctx)
     return c
 
 def random_value_for_device(username: str) -> float:
