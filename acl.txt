@@ -10,33 +10,33 @@
 % Block $SYS and blanket "#" subscriptions for everyone
 {deny, all, subscribe, ["$SYS/#", {eq, "#"}]}.
 
-% --- Telegraf subscribers (read all telemetry) ---
-{allow, {username, "telegraf"}, subscribe, [
+% --- giamdoc subscribers (read all) ---
+{allow, {username, "giamdoc"}, subscribe, [
     "factory/office/+/telemetry",
-    "$share/telegraf/factory/office/+/telemetry"
+    "$share/giamdoc/factory/office/+/telemetry"
 ]}.
-{allow, {username, "telegraf"}, subscribe, [
+{allow, {username, "giamdoc"}, subscribe, [
     "factory/energy/+/telemetry",
-    "$share/telegraf/factory/energy/+/telemetry"
+    "$share/giamdoc/factory/energy/+/telemetry"
 ]}.
-{allow, {username, "telegraf"}, subscribe, [
+{allow, {username, "giamdoc"}, subscribe, [
     "factory/production/+/telemetry",
-    "$share/telegraf/factory/production/+/telemetry"
+    "$share/giamdoc/factory/production/+/telemetry"
 ]}.
-{allow, {username, "telegraf"}, subscribe, [
+{allow, {username, "giamdoc"}, subscribe, [
     "factory/security/+/telemetry",
-    "$share/telegraf/factory/security/+/telemetry"
+    "$share/giamdoc/factory/security/+/telemetry"
 ]}.
-{allow, {username, "telegraf"}, subscribe, [
+{allow, {username, "giamdoc"}, subscribe, [
     "factory/storage/+/telemetry",
-    "$share/telegraf/factory/storage/+/telemetry"
+    "$share/giamdoc/factory/storage/+/telemetry"
 ]}.
 
 %% -------------------------------------------------------------------
 %% Devices (username == topic segment).
 %% topics = factory/<zone>/<username>/{telemetry|command}
 %% -------------------------------------------------------------------
-
+{allow, {username, "giamdoc"}, publish,   ["iot/devices/status"]}.
 % ===================== OFFICE =====================
 
 % -------- Temperature --------
@@ -689,6 +689,42 @@
 % -------- Camera (Motion) --------
 {allow, {username, "storage-sensor_motion"}, publish,   ["factory/storage/storage-sensor_motion/telemetry"]}.
 {allow, {username, "storage-sensor_motion"}, subscribe, ["factory/storage/storage-sensor_motion/command"]}.
+%% ===== ZONE MANAGER SUBSCRIBERS (read-only) =====
+
+%% OFFICE
+{allow, {username, "truongphong_office"}, subscribe, [
+    "factory/office/+/telemetry",
+    "$share/office/factory/office/+/telemetry"
+]}.
+{deny,  {username, "truongphong_office"}, publish, ["#"]}.
+
+%% ENERGY
+{allow, {username, "truongphong_energy"}, subscribe, [
+    "factory/energy/+/telemetry",
+    "$share/energy/factory/energy/+/telemetry"
+]}.
+{deny,  {username, "truongphong_energy"}, publish, ["#"]}.
+
+%% PRODUCTION
+{allow, {username, "truongphong_production"}, subscribe, [
+    "factory/production/+/telemetry",
+    "$share/production/factory/production/+/telemetry"
+]}.
+{deny,  {username, "truongphong_production"}, publish, ["#"]}.
+
+%% SECURITY
+{allow, {username, "truongphong_security"}, subscribe, [
+    "factory/security/+/telemetry",
+    "$share/security/factory/security/+/telemetry"
+]}.
+{deny,  {username, "truongphong_security"}, publish, ["#"]}.
+
+%% STORAGE
+{allow, {username, "truongphong_storage"}, subscribe, [
+    "factory/storage/+/telemetry",
+    "$share/storage/factory/storage/+/telemetry"
+]}.
+{deny,  {username, "truongphong_storage"}, publish, ["#"]}.
 
 % ===================== FINAL CATCH-ALL =====================
 {deny, all}.
