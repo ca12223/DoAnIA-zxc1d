@@ -124,10 +124,13 @@ def _is_publish(row: pd.Series, msgtype_col: Optional[str]) -> bool:
     s = str(v).lower()
     return ("publish" in s) and ("command" not in s) and ("req" not in s)
 
-def mk_client(client_id: str, username: Optional[str] = None) -> mqtt.Client:
+def mk_client(client_id: str, username: Optional[str] = None, password: Optional[str] = None) -> mqtt.Client:
     c = mqtt.Client(client_id=client_id)
-    if username:
-        c.username_pw_set(username)
+
+    if username and password:
+        c.username_pw_set(username, password)
+
+    # --- TLS for 8883 (custom context avoids BAD_SIGNATURE on some builds) ---
     import ssl, os
 
     ca_path = os.path.join(os.path.dirname(__file__), "certs", "ca-cert.pem")
@@ -141,6 +144,8 @@ def mk_client(client_id: str, username: Optional[str] = None) -> mqtt.Client:
     # ctx.maximum_version = ssl.TLSVersion.TLSv1_2
 
     c.tls_set_context(ctx)
+    # -------------------------------------------------------------------------
+
     return c
 
 def random_value_for_device(username: str) -> float:
@@ -178,10 +183,10 @@ def random_value_for_device(username: str) -> float:
 # Device thread (y như gốc, chỉ thêm "zone" vào payload)
 # -----------------------------------------------------------------------------
 def device_thread(device_name: str, csv_path: str, broker: str, port: int,
-                  username: Optional[str], speed_factor: float, min_interval: float):
-    topic = f"factory/{TENANT}/{device_name}/telemetry"
+                  username: Optional[str], password: Optional[str], speed_factor: float, min_interval: float):
+    topic = f"factory/{TENANT}/{username}/telemetry"
     client_id = f"{ZONE}-{username}-replayer"
-    client = mk_client(client_id, username)
+    client = mk_client(client_id, username, password)
 
     # connect with retry
     connected = False
@@ -260,10 +265,10 @@ def device_thread(device_name: str, csv_path: str, broker: str, port: int,
 # CLI
 # -----------------------------------------------------------------------------
 def main():
-    parser = argparse.ArgumentParser(description="CSV Replayer (Energy Zone)")
+    parser = argparse.ArgumentParser(description="CSV Replayer (Production Zone)")
     parser.add_argument("--indir", default="datasets", help="Folder containing device CSV files")
     parser.add_argument("--broker", default="emqx", help="MQTT broker host")
-    parser.add_argument("--port", type=int, default=1883, help="MQTT broker port")
+    parser.add_argument("--port", type=int, default=8883, help="MQTT broker port")
     parser.add_argument("--speed-factor", type=float, default=1.0, help=">1 speeds up, <1 slows down (default 1.0)")
     parser.add_argument("--min-interval", type=float, default=0.05, help="Minimum seconds between publishes after scaling")
     args = parser.parse_args()
@@ -275,19 +280,19 @@ def main():
     print("=" * 70)
 
     threads: List[threading.Thread] = []
-    for name, fname, username in DEVICES:
+    for name, fname, username, password in DEVICES:
         path = os.path.join(args.indir, fname)
         if not os.path.exists(path):
             print(f"Missing {path} - skipping {name}")
             continue
         t = threading.Thread(
             target=device_thread,
-            args=(name, path, args.broker, args.port, username, args.speed_factor, args.min_interval),
+            args=(name, path, args.broker, args.port, username, password, args.speed_factor, args.min_interval),
             daemon=True,
         )
         t.start()
         threads.append(t)
-        print(f"Started {name} → topic factory/{TENANT}/{name}/telemetry (file: {fname})")
+        print(f"Started {name} → topic factory/{TENANT}/{name}/telemetry (file: {fname}, user: {username})")
 
     try:
         while True:
