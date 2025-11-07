@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
-Hybrid Canonical CSV Replayer for STORAGE ZONE
-----------------------------------------------
-- Zone: STORAGE (~120 devices)
-- Each device replays its CSV timing but sends randomized payloads.
-- Adds "zone": "storage" in every published JSON.
-
+Hybrid Canonical CSV Replayer for OFFICE ZONE
+--------------------------------------------
+- Zone: OFFICE (~30 devices concept)
+- Giữ y nguyên logic gốc, payload thêm "zone": "office"
 Usage:
-  python mqtt_csv_replayer_storage.py --indir datasets --broker emqx --port 1883
+  python mqtt_csv_replayer_office.py --indir datasets --broker emqx --port 1883
 """
 
 from __future__ import annotations
@@ -16,6 +14,7 @@ from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 import pandas as pd
 import paho.mqtt.client as mqtt
+
 
 # ----------------------------------------------------------------------------- 
 # Canonical column candidates
@@ -33,52 +32,145 @@ TENANT = "storage"
 ZONE = "storage"
 
 # ----------------------------------------------------------------------------- 
-# Device set cho Production Floor
-# (Name, CSV filename, username-key để random_value_for_device)
+# Device set cho Office Zone
+# (Name, CSV filename, username, password)
 # -----------------------------------------------------------------------------
 DEVICES = [
-    ("Temperature", "TemperatureMQTTset.csv", "sensor_temp1"),
-    ("Temperature", "TemperatureMQTTset.csv", "sensor_temp2"),
-    ("Temperature", "TemperatureMQTTset.csv", "sensor_temp3"),
+("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp1",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp2",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp3",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp4",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp5",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp6",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp7",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp8",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp9",  "temp123"),
+    ("Temperature", "TemperatureMQTTset.csv", "storage-sensor_temp10", "temp123"),
 
-    ("Humidity", "HumidityMQTTset.csv", "sensor_hum1"),
-    ("Humidity", "HumidityMQTTset.csv", "sensor_hum2"),
-    ("Humidity", "HumidityMQTTset.csv", "sensor_hum3"),
+    # -------- Humidity --------
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum1",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum2",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum3",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum4",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum5",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum6",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum7",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum8",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum9",  "hum123"),
+    ("Humidity", "HumidityMQTTset.csv", "storage-sensor_hum10", "hum123"),
 
-    ("CO-Gas", "CO-GasMQTTset.csv", "sensor_co1"),
-    ("CO-Gas", "CO-GasMQTTset.csv", "sensor_co2"),
-    ("CO-Gas", "CO-GasMQTTset.csv", "sensor_co3"),
+    # -------- CO-Gas --------
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co1",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co2",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co3",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co4",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co5",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co6",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co7",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co8",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co9",  "co123"),
+    ("CO-Gas", "CO-GasMQTTset.csv", "storage-sensor_co10", "co123"),
 
-    ("Smoke", "SmokeMQTTset.csv", "sensor_smoke1"),
-    ("Smoke", "SmokeMQTTset.csv", "sensor_smoke2"),
-    ("Smoke", "SmokeMQTTset.csv", "sensor_smoke3"),
+    # -------- Smoke --------
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke1",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke2",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke3",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke4",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke5",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke6",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke7",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke8",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke9",  "smoke123"),
+    ("Smoke", "SmokeMQTTset.csv", "storage-sensor_smoke10", "smoke123"),
 
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "sensor_flame1"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "sensor_flame2"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "sensor_flame3"),
+    # -------- FlameSensor --------
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame1",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame2",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame3",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame4",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame5",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame6",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame7",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame8",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame9",  "flame123"),
+    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "storage-sensor_flame10", "flame123"),
 
-    ("Light", "LightIntensityMQTTset.csv", "sensor_light1"),
-    ("Light", "LightIntensityMQTTset.csv", "sensor_light2"),
-    ("Light", "LightIntensityMQTTset.csv", "sensor_light3"),
+    # -------- Light --------
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light1",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light2",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light3",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light4",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light5",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light6",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light7",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light8",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light9",  "light123"),
+    ("Light", "LightIntensityMQTTset.csv", "storage-sensor_light10", "light123"),
 
-    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "sensor_sound1"),
-    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "sensor_sound2"),
-    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "sensor_sound3"),
+    # -------- SoundSensor --------
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound1",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound2",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound3",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound4",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound5",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound6",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound7",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound8",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound9",  "sound123"),
+    ("SoundSensor", "Edge-IIoTset_sound_sensors.csv", "storage-sensor_sound10", "sound123"),
 
-    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "sensor_water1"),
-    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "sensor_water2"),
+    # -------- WaterLevel --------
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water1",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water2",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water3",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water4",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water5",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water6",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water7",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water8",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water9",  "water123"),
+    ("WaterLevel", "Edge-IIoTset_WaterLV.csv", "storage-sensor_water10", "water123"),
 
-    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "sensor_distance1"),
-    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "sensor_distance2"),
+    # -------- DistanceSensor --------
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance1",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance2",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance3",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance4",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance5",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance6",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance7",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance8",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance9",  "distance123"),
+    ("DistanceSensor", "Edge-IIoTset_distance_sensor.csv", "storage-sensor_distance10", "distance123"),
 
-    ("PhLevel", "Edge-IIoTset_PhLv.csv", "sensor_ph1"),
-    ("PhLevel", "Edge-IIoTset_PhLv.csv", "sensor_ph2"),
+    # -------- PhLevel --------
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph1",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph2",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph3",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph4",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph5",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph6",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph7",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph8",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph9",  "ph123"),
+    ("PhLevel", "Edge-IIoTset_PhLv.csv", "storage-sensor_ph10", "ph123"),
 
-    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "sensor_soil1"),
-    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "sensor_soil2"),
+    # -------- SoilMoisture --------
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil1",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil2",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil3",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil4",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil5",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil6",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil7",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil8",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil9",  "soil123"),
+    ("SoilMoisture", "Edge-IIoTset_soil_moisture.csv", "storage-sensor_soil10", "soil123"),
 
-    ("Camera", "MotionMQTTset.csv", "sensor_motion"),
+    # -------- Camera (Motion) --------
+    ("Camera", "MotionMQTTset.csv", "storage-sensor_motion", "motion123"),
 ]
+
 
 # ----------------------------------------------------------------------------- 
 # Helpers (y như file gốc)
@@ -119,10 +211,28 @@ def _is_publish(row: pd.Series, msgtype_col: Optional[str]) -> bool:
     s = str(v).lower()
     return ("publish" in s) and ("command" not in s) and ("req" not in s)
 
-def mk_client(client_id: str, username: Optional[str] = None) -> mqtt.Client:
+def mk_client(client_id: str, username: Optional[str] = None, password: Optional[str] = None) -> mqtt.Client:
     c = mqtt.Client(client_id=client_id)
-    if username:
-        c.username_pw_set(username)
+
+    if username and password:
+        c.username_pw_set(username, password)
+
+    # --- TLS for 8883 (custom context avoids BAD_SIGNATURE on some builds) ---
+    import ssl, os
+
+    ca_path = os.path.join(os.path.dirname(__file__), "certs", "ca-cert.pem")
+
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=ca_path)
+    ctx.check_hostname = True          # SAN includes emqx/localhost/127.0.0.1
+    ctx.verify_mode = ssl.CERT_REQUIRED
+
+    # If your Windows Python still hits the RSA-PSS bug, you can temporarily pin TLS 1.2:
+    # ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+    # ctx.maximum_version = ssl.TLSVersion.TLSv1_2
+
+    c.tls_set_context(ctx)
+    # -------------------------------------------------------------------------
+
     return c
 
 def random_value_for_device(username: str) -> float:
@@ -160,10 +270,10 @@ def random_value_for_device(username: str) -> float:
 # Device thread (y như gốc, chỉ thêm "zone" vào payload)
 # -----------------------------------------------------------------------------
 def device_thread(device_name: str, csv_path: str, broker: str, port: int,
-                  username: Optional[str], speed_factor: float, min_interval: float):
-    topic = f"factory/{TENANT}/{device_name}/telemetry"
+                  username: Optional[str], password: Optional[str], speed_factor: float, min_interval: float):
+    topic = f"factory/{TENANT}/{username}/telemetry"
     client_id = f"{ZONE}-{username}-replayer"
-    client = mk_client(client_id, username)
+    client = mk_client(client_id, username, password)
 
     # connect with retry
     connected = False
@@ -245,9 +355,9 @@ def main():
     parser = argparse.ArgumentParser(description="CSV Replayer (Production Zone)")
     parser.add_argument("--indir", default="datasets", help="Folder containing device CSV files")
     parser.add_argument("--broker", default="emqx", help="MQTT broker host")
-    parser.add_argument("--port", type=int, default=1883, help="MQTT broker port")
-    parser.add_argument("--speed-factor", type=float, default=1.0, help=">1 speeds up, <1 slows down (default 1.0)")
-    parser.add_argument("--min-interval", type=float, default=0.05, help="Minimum seconds between publishes after scaling")
+    parser.add_argument("--port", type=int, default=8883, help="MQTT broker port")
+    parser.add_argument("--speed-factor", type=float, default=0.5, help=">1 speeds up, <1 slows down (default 1.0)")
+    parser.add_argument("--min-interval", type=float, default=0.5, help="Minimum seconds between publishes after scaling")
     args = parser.parse_args()
 
     print("CSV Replayer (Production Zone) Starting...")
@@ -257,19 +367,19 @@ def main():
     print("=" * 70)
 
     threads: List[threading.Thread] = []
-    for name, fname, username in DEVICES:
+    for name, fname, username, password in DEVICES:
         path = os.path.join(args.indir, fname)
         if not os.path.exists(path):
             print(f"Missing {path} - skipping {name}")
             continue
         t = threading.Thread(
             target=device_thread,
-            args=(name, path, args.broker, args.port, username, args.speed_factor, args.min_interval),
+            args=(name, path, args.broker, args.port, username, password, args.speed_factor, args.min_interval),
             daemon=True,
         )
         t.start()
         threads.append(t)
-        print(f"Started {name} → topic factory/{TENANT}/{name}/telemetry (file: {fname})")
+        print(f"Started {name} → topic factory/{TENANT}/{name}/telemetry (file: {fname}, user: {username})")
 
     try:
         while True:
