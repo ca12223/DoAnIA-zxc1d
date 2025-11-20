@@ -40,54 +40,6 @@ DEVICES = [
 
 
 
-    # -------- CO-Gas --------
-    ("CO-Gas", "CO-GasMQTTset.csv", "security-sensor_co1", "co123"),
- 
-
-    # -------- AirQuality --------
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air1", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air2", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air3", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air4", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air5", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air6", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air7", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air8", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air9", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air10", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air11", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air12", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air13", "air123"),
-    ("AirQuality", "air-quality_gotham.csv", "security-sensor_air14", "air123"),
-
-    # -------- Smoke --------
-    ("Smoke", "SmokeMQTTset.csv", "security-sensor_smoke1", "smoke123"),
-
-
-    # -------- FlameSensor --------
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame1", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame2", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame3", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame4", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame5", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame6", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame7", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame8", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame9", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame10", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame11", "flame123"),
-    ("FlameSensor", "Edge-IIoTset_flame_sensor.csv", "security-sensor_flame12", "flame123"),
-    ("Temperature", "TemperatureMQTTset.csv", "security-sensortemp1-replayer", "temp123"),
-    ("Temperature", "TemperatureMQTTset.csv", "security-sensortemp2-replayer", "temp123"),
-    ("Temperature", "TemperatureMQTTset.csv", "security-sensortemp3-replayer", "temp123"),
-    ("Temperature", "TemperatureMQTTset.csv", "security-sensortemp4-replayer", "temp123"),
-
-    ("Humidity", "HumidityMQTTset.csv", "security-sensorhum1-replayer", "hum123"),
-    ("Humidity", "HumidityMQTTset.csv", "security-sensorhum2-replayer", "hum123"),
-    ("Humidity", "HumidityMQTTset.csv", "security-sensorhum3-replayer", "hum123"),
-    ("Humidity", "HumidityMQTTset.csv", "security-sensorhum4-replayer", "hum123"),
-    ("Humidity", "HumidityMQTTset.csv", "security-sensorhum5-replayer", "hum123"),
-
 ]
 
 # -----------------------------------------------------------------------------
