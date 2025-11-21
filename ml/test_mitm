@@ -1,0 +1,75 @@
+import pandas as pd
+import time, json
+import paho.mqtt.client as mqtt
+from datetime import datetime, timezone
+import numpy as np
+
+CSV_PATH = "MitM.csv"
+
+BROKER_HOST = "your-broker-host"
+BROKER_PORT = 8883
+
+TENANT = "tenantX"
+CLIENT_ID = "office-ultra-01"
+USERNAME = "office-ultra-01"
+PASSWORD = "123456"  # whatever you configured
+
+# Map capture topics -> your real topics
+TOPIC_MAP = {
+    "distance/ultrasonic1": f"factory/{TENANT}/{CLIENT_ID}/telemetry"
+}
+
+def make_client():
+    c = mqtt.Client(client_id=CLIENT_ID, clean_session=True)
+    c.username_pw_set(USERNAME, PASSWORD)
+
+    # Reuse your TLS setup from replayer_office.py:
+    # c.tls_set(ca_certs=..., certfile=..., keyfile=...)
+    # c.tls_insecure_set(False)
+
+    c.connect(BROKER_HOST, BROKER_PORT, keepalive=60)
+    return c
+
+# --- Load and filter CSV ---
+
+df = pd.read_csv(CSV_PATH, low_memory=False)
+
+# Only MQTT PUBLISH rows with a topic
+rows = df[
+    (df["mqtt.msgtype"] == 3) &
+    df["mqtt.topic"].notna()
+].copy()
+
+# Sort by capture time and compute inter-message intervals
+rows = rows.sort_values("frame.time_relative")
+t = rows["frame.time_relative"].values
+intervals = np.diff(t, prepend=t[0])
+
+client = make_client()
+client.loop_start()
+
+try:
+    for (_, row), dt in zip(rows.iterrows(), intervals):
+        # Respect original timing (you can scale this if needed)
+        if dt > 0:
+            time.sleep(dt)
+
+        src_topic = row["mqtt.topic"]
+        dst_topic = TOPIC_MAP.get(src_topic, src_topic)
+
+        qos = int(row["mqtt.qos"] or 0)
+        retain = bool(row["mqtt.retain"])
+
+        value = float(row["mqtt.msg"]) if not pd.isna(row["mqtt.msg"]) else None
+
+        payload = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "value": value,
+            "label": row["type"],  # "normal" or "mitm" – useful for debugging/IDS eval
+        }
+
+        client.publish(dst_topic, json.dumps(payload), qos=qos, retain=retain)
+
+finally:
+    client.loop_stop()
+    client.disconnect()
