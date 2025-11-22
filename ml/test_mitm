@@ -1,47 +1,59 @@
-import pandas as pd
-import time, json
-import paho.mqtt.client as mqtt
-from datetime import datetime, timezone
+import os
+import time
+import json
+import ssl
+from datetime import datetime, timedelta, timezone
+
 import numpy as np
+import pandas as pd
+import paho.mqtt.client as mqtt
 
-CSV_PATH = "MitM.csv"
+# --- Timezone (UTC+07) ---
+UTC_PLUS_7 = timezone(timedelta(hours=7))
 
-BROKER_HOST = "your-broker-host"
+# --- Paths ---
+BASE_DIR = os.path.dirname(__file__)
+CSV_PATH = os.path.join(BASE_DIR, "MitM.csv")
+CA_PATH = os.path.join(BASE_DIR, "certs", "ca-cert.pem")
+
+# --- MQTT / EMQX settings ---
+BROKER_HOST = "10.12.112.191"
 BROKER_PORT = 8883
 
-TENANT = "tenantX"
-CLIENT_ID = "office-ultra-01"
-USERNAME = "office-ultra-01"
-PASSWORD = "123456"  # whatever you configured
+TENANT = "office"
+DEVICE_ID = "office-sensorhum7-replayer"   # matches your ACL username
+CLIENT_ID = DEVICE_ID
+USERNAME = DEVICE_ID
+PASSWORD = "hum123"
 
-# Map capture topics -> your real topics
+# Map ONLY the topics you want this client to publish
 TOPIC_MAP = {
-    "distance/ultrasonic1": f"factory/{TENANT}/{CLIENT_ID}/telemetry"
+    # source_topic in CSV : destination topic on your broker
+    "distance/ultrasonic1": f"factory/{TENANT}/{DEVICE_ID}/telemetry",
+    # if later you want light topics, add them here with a proper ACL
 }
 
-def make_client():
-    c = mqtt.Client(client_id=CLIENT_ID, clean_session=True)
-    c.username_pw_set(USERNAME, PASSWORD)
 
-    # Reuse your TLS setup from replayer_office.py:
-    # c.tls_set(ca_certs=..., certfile=..., keyfile=...)
-    # c.tls_insecure_set(False)
+def make_client() -> mqtt.Client:
+    client = mqtt.Client(client_id=CLIENT_ID, clean_session=True)
+    client.username_pw_set(USERNAME, PASSWORD)
 
-    c.connect(BROKER_HOST, BROKER_PORT, keepalive=60)
-    return c
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=CA_PATH)
+    ctx.check_hostname = True          # or False if cert CN doesn't match host
+    ctx.verify_mode = ssl.CERT_REQUIRED
+    client.tls_set_context(ctx)
 
-# --- Load and filter CSV ---
+    client.connect(BROKER_HOST, BROKER_PORT, keepalive=60)
+    return client
 
+
+# --- Load CSV and select MQTT PUBLISH packets ---
 df = pd.read_csv(CSV_PATH, low_memory=False)
 
-# Only MQTT PUBLISH rows with a topic
-rows = df[
-    (df["mqtt.msgtype"] == 3) &
-    df["mqtt.topic"].notna()
-].copy()
-
-# Sort by capture time and compute inter-message intervals
+rows = df[(df["mqtt.msgtype"] == 3) & df["mqtt.topic"].notna()].copy()
 rows = rows.sort_values("frame.time_relative")
+
+# Inter-message intervals (seconds)
 t = rows["frame.time_relative"].values
 intervals = np.diff(t, prepend=t[0])
 
@@ -49,25 +61,34 @@ client = make_client()
 client.loop_start()
 
 try:
-    for (_, row), dt in zip(rows.iterrows(), intervals):
-        # Respect original timing (you can scale this if needed)
+    for (idx, row), dt in zip(rows.iterrows(), intervals):
+        src_topic = row["mqtt.topic"]
+
+        # ✅ Only replay topics we have mapped (skips light/rele1 etc.)
+        if src_topic not in TOPIC_MAP:
+            continue
+
+        dst_topic = TOPIC_MAP[src_topic]
+
+        # Respect original timing
         if dt > 0:
             time.sleep(dt)
-
-        src_topic = row["mqtt.topic"]
-        dst_topic = TOPIC_MAP.get(src_topic, src_topic)
 
         qos = int(row["mqtt.qos"] or 0)
         retain = bool(row["mqtt.retain"])
 
-        value = float(row["mqtt.msg"]) if not pd.isna(row["mqtt.msg"]) else None
+        # Skip if no numeric payload
+        if pd.isna(row["mqtt.msg"]):
+            continue
+        value = float(row["mqtt.msg"])
 
         payload = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC_PLUS_7).isoformat(),
             "value": value,
-            "label": row["type"],  # "normal" or "mitm" – useful for debugging/IDS eval
+            "label": row["type"],  # "normal" or "mitm"
         }
 
+        print(f"[{idx}] Publishing to {dst_topic}: {payload}")
         client.publish(dst_topic, json.dumps(payload), qos=qos, retain=retain)
 
 finally:
