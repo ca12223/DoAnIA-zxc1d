@@ -3,7 +3,8 @@
 <!-- ========================================================= -->
 
 <p align="center">
-<img src="docs/images/banner.png" width="100%">
+<img width="1254" height="1254" alt="image" src="https://github.com/user-attachments/assets/ec6bce94-7c68-4eb5-8088-0ea99071f37c" />
+
 </p>
 
 <h1 align="center">
